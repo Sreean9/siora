@@ -22,11 +22,20 @@ if "order_details" not in st.session_state:
 
 # Function to create budget allocation pie chart
 def create_budget_allocation_chart():
+    # Get actual budget values
+    grocery_budget = st.session_state.get("grocery_budget", 5000)
+    household_budget = st.session_state.get("household_budget", 2000)
+    total_budget = grocery_budget + household_budget
+    
+    # Calculate actual percentages
+    grocery_percent = (grocery_budget / total_budget * 100) if total_budget > 0 else 0
+    household_percent = (household_budget / total_budget * 100) if total_budget > 0 else 0
+    
     # Create data for the pie chart
     budget_data = {
         'Category': ['Groceries', 'Household'],
-        'Budget': [st.session_state.get("grocery_budget", 5000), 
-                  st.session_state.get("household_budget", 2000)]
+        'Budget': [grocery_budget, household_budget],
+        'Percentage': [f"{grocery_percent:.1f}%", f"{household_percent:.1f}%"]
     }
     
     df = pd.DataFrame(budget_data)
@@ -40,10 +49,12 @@ def create_budget_allocation_chart():
         color_discrete_sequence=px.colors.qualitative.Pastel
     )
     
+    # Update to show actual percentages
     fig.update_traces(
         textposition='inside', 
         textinfo='percent+label',
-        marker=dict(line=dict(color='#FFFFFF', width=2))
+        marker=dict(line=dict(color='#FFFFFF', width=2)),
+        texttemplate='%{percent:.1f}% %{label}'
     )
     
     return fig
@@ -53,19 +64,33 @@ def update_budget_remaining_chart():
     # Get current month for the title
     current_month = datetime.datetime.now().strftime("%B")
     
+    # Get actual budget values and spending
+    grocery_budget = st.session_state.get("grocery_budget", 5000)
+    household_budget = st.session_state.get("household_budget", 2000)
+    grocery_spent = st.session_state.monthly_spending.get("Groceries", 0)
+    household_spent = st.session_state.monthly_spending.get("Household", 0)
+    
+    # Calculate remaining and percentages
+    grocery_remaining = max(0, grocery_budget - grocery_spent)
+    household_remaining = max(0, household_budget - household_spent)
+    
+    grocery_spent_pct = (grocery_spent / grocery_budget * 100) if grocery_budget > 0 else 0
+    household_spent_pct = (household_spent / household_budget * 100) if household_budget > 0 else 0
+    
+    grocery_remaining_pct = (grocery_remaining / grocery_budget * 100) if grocery_budget > 0 else 0
+    household_remaining_pct = (household_remaining / household_budget * 100) if household_budget > 0 else 0
+    
     # Create data for the chart
     budget_data = {
         'Category': ['Groceries', 'Household'],
-        'Budget': [st.session_state.get("grocery_budget", 5000), 
-                  st.session_state.get("household_budget", 2000)],
-        'Spent': [st.session_state.monthly_spending["Groceries"], 
-                 st.session_state.monthly_spending["Household"]]
+        'Budget': [grocery_budget, household_budget],
+        'Spent': [grocery_spent, household_spent],
+        'Remaining': [grocery_remaining, household_remaining],
+        'Spent_Pct': [grocery_spent_pct, household_spent_pct],
+        'Remaining_Pct': [grocery_remaining_pct, household_remaining_pct]
     }
     
     df = pd.DataFrame(budget_data)
-    
-    # Calculate remaining budget
-    df['Remaining'] = df['Budget'] - df['Spent']
     
     # Create a stacked bar chart
     fig = px.bar(
@@ -77,26 +102,24 @@ def update_budget_remaining_chart():
         color_discrete_map={'Spent': '#FF6B6B', 'Remaining': '#4ECDC4'}
     )
     
-    # Calculate percentage spent
+    # Add spent and remaining percentage annotations
     for i, row in df.iterrows():
-        percentage = (row['Spent'] / row['Budget'] * 100) if row['Budget'] > 0 else 0
-        remaining_percent = 100 - percentage
+        # Only add spent annotation if there's actual spending
+        if row['Spent'] > 0:
+            fig.add_annotation(
+                x=row['Category'],
+                y=row['Spent'] / 2,
+                text=f"{row['Spent_Pct']:.1f}% Spent",
+                showarrow=False,
+                font=dict(color="white" if row['Spent_Pct'] > 30 else "black", size=12)
+            )
         
-        # Add spent percentage annotation
-        fig.add_annotation(
-            x=row['Category'],
-            y=row['Spent'] / 2,
-            text=f"{percentage:.1f}% Spent",
-            showarrow=False,
-            font=dict(color="white" if percentage > 30 else "black", size=12)
-        )
-        
-        # Add remaining percentage annotation
-        if remaining_percent > 15:  # Only add if there's enough space
+        # Only add remaining annotation if there's actual remaining budget
+        if row['Remaining'] > 0 and row['Remaining_Pct'] > 15:
             fig.add_annotation(
                 x=row['Category'],
                 y=row['Spent'] + (row['Remaining'] / 2),
-                text=f"{remaining_percent:.1f}% Left",
+                text=f"{row['Remaining_Pct']:.1f}% Left",
                 showarrow=False,
                 font=dict(color="black", size=12)
             )
@@ -138,7 +161,7 @@ if st.session_state.order_placed:
         if row['Spent'] > row['Budget']:
             st.warning(f"⚠️ You have exceeded your {row['Category']} budget by ₹{row['Spent'] - row['Budget']:.2f}!")
         elif row['Spent'] > row['Budget'] * 0.8:
-            st.info(f"ℹ️ You have used {row['Spent'] / row['Budget'] * 100:.1f}% of your {row['Category']} budget for this month.")
+            st.info(f"ℹ️ You have used {row['Spent_Pct']:.1f}% of your {row['Category']} budget for this month.")
     
     # Button to continue shopping
     if st.button("Continue Shopping"):
@@ -154,8 +177,8 @@ if not st.session_state.order_placed:
         
         st.header("Monthly Budget")
         # Store these values in session state so they persist
-        st.session_state.grocery_budget = st.number_input("Grocery Budget (₹)", value=st.session_state.get("grocery_budget", 5000))
-        st.session_state.household_budget = st.number_input("Household Budget (₹)", value=st.session_state.get("household_budget", 2000))
+        st.session_state.grocery_budget = st.number_input("Grocery Budget (₹)", value=st.session_state.get("grocery_budget", 5000), min_value=0)
+        st.session_state.household_budget = st.number_input("Household Budget (₹)", value=st.session_state.get("household_budget", 2000), min_value=0)
         
         # Show budget allocation pie chart
         if st.session_state.grocery_budget > 0 or st.session_state.household_budget > 0:
@@ -170,9 +193,11 @@ if not st.session_state.order_placed:
             
             # Add a reset budget button
             if st.button("Reset Monthly Spending"):
+                # Reset only the spending, not the budgets
                 st.session_state.monthly_spending = {"Groceries": 0, "Household": 0}
                 st.success("Monthly spending has been reset!")
-                st.rerun()
+                # Force update the displayed charts
+                st.experimental_rerun()
 
     # Shopping list input
     st.header("Your Shopping List")
@@ -310,8 +335,9 @@ if not st.session_state.order_placed:
                         
                         # Distribute cost proportionally
                         if grocery_count + household_count > 0:
-                            grocery_ratio = grocery_count / (grocery_count + household_count + other_count) if (grocery_count + household_count + other_count) > 0 else 0
-                            household_ratio = household_count / (grocery_count + household_count + other_count) if (grocery_count + household_count + other_count) > 0 else 0
+                            total_items = grocery_count + household_count + other_count
+                            grocery_ratio = grocery_count / total_items if total_items > 0 else 0
+                            household_ratio = household_count / total_items if total_items > 0 else 0
                             
                             # Default distribution if we can't categorize
                             if grocery_ratio + household_ratio == 0:
@@ -344,7 +370,7 @@ if not st.session_state.order_placed:
                         st.session_state.shopping_list = []
                         
                         # Rerun to show confirmation screen
-                        st.rerun()
+                        st.experimental_rerun()
             
             # Buy button for best marketplace (outside the expanders)
             st.subheader("Ready to Purchase?")
@@ -364,8 +390,9 @@ if not st.session_state.order_placed:
                 
                 # Distribute cost proportionally
                 if grocery_count + household_count > 0:
-                    grocery_ratio = grocery_count / (grocery_count + household_count + other_count) if (grocery_count + household_count + other_count) > 0 else 0
-                    household_ratio = household_count / (grocery_count + household_count + other_count) if (grocery_count + household_count + other_count) > 0 else 0
+                    total_items = grocery_count + household_count + other_count
+                    grocery_ratio = grocery_count / total_items if total_items > 0 else 0
+                    household_ratio = household_count / total_items if total_items > 0 else 0
                     
                     # Default distribution if we can't categorize
                     if grocery_ratio + household_ratio == 0:
@@ -398,7 +425,7 @@ if not st.session_state.order_placed:
                 st.session_state.shopping_list = []
                 
                 # Rerun to show confirmation screen
-                st.rerun()
+                st.experimental_rerun()
 
     # Display welcome message for first-time users
     if not st.session_state.shopping_list and not st.session_state.comparison_results:
@@ -410,12 +437,12 @@ if not st.session_state.order_placed:
         with col1:
             if st.button("Milk, Bread, Eggs"):
                 st.session_state.shopping_list = ["Milk", "Bread", "Eggs"]
-                st.rerun()
+                st.experimental_rerun()
         with col2:
             if st.button("Rice, Flour, Soap"):
                 st.session_state.shopping_list = ["Rice", "Flour", "Soap"]
-                st.rerun()
+                st.experimental_rerun()
         with col3:
             if st.button("Vegetables, Fruits"):
                 st.session_state.shopping_list = ["Vegetables", "Fruits"]
-                st.rerun()
+                st.experimental_rerun()
