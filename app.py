@@ -3,6 +3,7 @@ import pandas as pd
 import random
 import time
 import plotly.express as px
+import datetime
 
 # App configuration
 st.set_page_config(page_title="Siora - Shopping Assistant", page_icon="🛒", layout="wide")
@@ -12,9 +13,49 @@ if "shopping_list" not in st.session_state:
     st.session_state.shopping_list = []
 if "comparison_results" not in st.session_state:
     st.session_state.comparison_results = None
+if "monthly_spending" not in st.session_state:
+    st.session_state.monthly_spending = {"Groceries": 0, "Household": 0}
+
+# Function to update the budget chart
+def update_budget_chart():
+    # Get current month for the title
+    current_month = datetime.datetime.now().strftime("%B")
+    
+    # Create data for the chart
+    budget_data = {
+        'Category': ['Groceries', 'Household'],
+        'Budget': [st.session_state.get("grocery_budget", 5000), 
+                  st.session_state.get("household_budget", 2000)],
+        'Spent': [st.session_state.monthly_spending["Groceries"], 
+                 st.session_state.monthly_spending["Household"]]
+    }
+    
+    df = pd.DataFrame(budget_data)
+    
+    # Calculate remaining budget
+    df['Remaining'] = df['Budget'] - df['Spent']
+    
+    # Create a stacked bar chart
+    fig = px.bar(df, x='Category', y=['Spent', 'Remaining'], 
+                title=f'Budget Tracking for {current_month}',
+                labels={'value': 'Amount (₹)', 'variable': 'Status'},
+                color_discrete_map={'Spent': '#FF6B6B', 'Remaining': '#4ECDC4'})
+    
+    # Calculate percentage spent
+    for i, row in df.iterrows():
+        percentage = (row['Spent'] / row['Budget'] * 100) if row['Budget'] > 0 else 0
+        fig.add_annotation(
+            x=row['Category'],
+            y=row['Spent'] / 2,
+            text=f"{percentage:.1f}%",
+            showarrow=False,
+            font=dict(color="white" if percentage > 30 else "black")
+        )
+    
+    return fig, df
 
 # App header
-st.title("🛒 Siora - Your Shopping Buddy")
+st.title("🛒 Siora - Shopping Optimization Agent")
 st.write("Compare prices across marketplaces to save money!")
 
 # Sidebar for user info
@@ -23,16 +64,21 @@ with st.sidebar:
     user_name = st.text_input("Your Name", "Demo User")
     
     st.header("Monthly Budget")
-    grocery_budget = st.number_input("Grocery Budget (₹)", value=5000)
-    household_budget = st.number_input("Household Budget (₹)", value=2000)
+    # Store these values in session state so they persist
+    st.session_state.grocery_budget = st.number_input("Grocery Budget (₹)", value=st.session_state.get("grocery_budget", 5000))
+    st.session_state.household_budget = st.number_input("Household Budget (₹)", value=st.session_state.get("household_budget", 2000))
     
-    # Budget visualization
-    if grocery_budget or household_budget:
-        data = {'Category': ['Groceries', 'Household'], 
-                'Amount': [grocery_budget, household_budget]}
-        df = pd.DataFrame(data)
-        fig = px.pie(df, values='Amount', names='Category', title='Budget Allocation')
-        st.plotly_chart(fig)
+    # Show budget tracking chart if we have budgets set
+    if st.session_state.grocery_budget > 0 or st.session_state.household_budget > 0:
+        st.subheader("Budget Tracking")
+        budget_fig, _ = update_budget_chart()
+        st.plotly_chart(budget_fig, use_container_width=True)
+        
+        # Add a reset budget button
+        if st.button("Reset Monthly Spending"):
+            st.session_state.monthly_spending = {"Groceries": 0, "Household": 0}
+            st.success("Monthly spending has been reset!")
+            st.rerun()
 
 # Shopping list input
 st.header("Your Shopping List")
@@ -153,5 +199,64 @@ if st.session_state.comparison_results:
         # Buy button
         st.subheader("Ready to Purchase?")
         if st.button(f"Buy from {best_marketplace.capitalize()}", type="primary"):
+            # Process the purchase
             st.balloons()
             st.success(f"Order placed with {best_marketplace.capitalize()}! Your items will be delivered soon.")
+            
+            # Update monthly spending
+            # Determine if this is primarily groceries or household items
+            # (a simple approach - you can make this more sophisticated)
+            grocery_items = ["milk", "bread", "eggs", "rice", "flour", "vegetables", "fruits"]
+            household_items = ["soap", "detergent", "tissues", "cleaner"]
+            
+            # Calculate how much of the total is groceries vs household items
+            total_spent = marketplace_totals[best_marketplace]["grand_total"]
+            grocery_count = sum(1 for item in st.session_state.shopping_list if any(g in item.lower() for g in grocery_items))
+            household_count = sum(1 for item in st.session_state.shopping_list if any(h in item.lower() for h in household_items))
+            other_count = len(st.session_state.shopping_list) - grocery_count - household_count
+            
+            # Distribute cost proportionally
+            if grocery_count + household_count > 0:
+                grocery_ratio = grocery_count / (grocery_count + household_count + other_count) if (grocery_count + household_count + other_count) > 0 else 0
+                household_ratio = household_count / (grocery_count + household_count + other_count) if (grocery_count + household_count + other_count) > 0 else 0
+                
+                # Default distribution if we can't categorize
+                if grocery_ratio + household_ratio == 0:
+                    grocery_ratio = 0.7  # Assume 70% groceries by default
+                    household_ratio = 0.3  # and 30% household items
+                
+                # Update spending in session state
+                st.session_state.monthly_spending["Groceries"] += total_spent * grocery_ratio
+                st.session_state.monthly_spending["Household"] += total_spent * household_ratio
+            else:
+                # If no categorization, put all in groceries by default
+                st.session_state.monthly_spending["Groceries"] += total_spent
+            
+            # Show budget tracking after purchase
+            st.subheader("Updated Budget Status")
+            budget_fig, budget_df = update_budget_chart()
+            st.plotly_chart(budget_fig, use_container_width=True)
+            
+            # Show warnings if over budget
+            for idx, row in budget_df.iterrows():
+                if row['Spent'] > row['Budget']:
+                    st.warning(f"⚠️ You have exceeded your {row['Category']} budget by ₹{row['Spent'] - row['Budget']:.2f}!")
+                elif row['Spent'] > row['Budget'] * 0.8:
+                    st.info(f"ℹ️ You have used {row['Spent'] / row['Budget'] * 100:.1f}% of your {row['Category']} budget.")
+            
+            # Reset for next comparison
+            st.session_state.comparison_results = None
+            st.session_state.shopping_list = []
+
+# Display welcome message for first-time users
+if not st.session_state.shopping_list and not st.session_state.comparison_results:
+    st.info("👋 Welcome to Siora! Enter a shopping list above to compare prices across marketplaces.")
+    
+    # Show demo items
+    st.write("Try these example items:")
+    if st.button("Milk, Bread, Eggs"):
+        st.session_state.shopping_list = ["Milk", "Bread", "Eggs"]
+        st.rerun()
+    if st.button("Rice, Flour, Soap"):
+        st.session_state.shopping_list = ["Rice", "Flour", "Soap"]
+        st.rerun()
