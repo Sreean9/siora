@@ -5,20 +5,27 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API Keys
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "dummy-key-for-demo")
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "dummy-key-for-demo")
 
 # Marketplace Configurations
 MARKETPLACES = {
     "zepto": {
         "base_url": "https://www.zepto.com/api/v1",
-        "api_key": os.getenv("ZEPTO_API_KEY"),
+        "api_key": os.getenv("ZEPTO_API_KEY", "dummy-key"),
     },
     "swiggy": {
         "base_url": "https://www.swiggy.com/api/v1",
-        "api_key": os.getenv("SWIGGY_API_KEY"),
+        "api_key": os.getenv("SWIGGY_API_KEY", "dummy-key"),
     },
-    # Add other marketplaces as needed
+    "blinkit": {
+        "base_url": "https://www.blinkit.com/api/v1",
+        "api_key": os.getenv("BLINKIT_API_KEY", "dummy-key"),
+    },
+    "bigbasket": {
+        "base_url": "https://www.bigbasket.com/api/v1",
+        "api_key": os.getenv("BIGBASKET_API_KEY", "dummy-key"),
+    }
 }
 
 # Database Configuration
