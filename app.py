@@ -14,7 +14,7 @@ if "comparison_results" not in st.session_state:
     st.session_state.comparison_results = None
 
 # App header
-st.title("🛒 Siora - Shopping Optimization Agent")
+st.title("🛒 Siora - Your Shopping Buddy")
 st.write("Compare prices across marketplaces to save money!")
 
 # Sidebar for user info
