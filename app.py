@@ -166,7 +166,7 @@ if st.session_state.order_placed:
     # Button to continue shopping
     if st.button("Continue Shopping"):
         st.session_state.order_placed = False
-        st.rerun()
+        st.rerun()  # Changed from experimental_rerun
 
 # Only show regular UI if no order was just placed
 if not st.session_state.order_placed:
@@ -197,7 +197,7 @@ if not st.session_state.order_placed:
                 st.session_state.monthly_spending = {"Groceries": 0, "Household": 0}
                 st.success("Monthly spending has been reset!")
                 # Force update the displayed charts
-                st.experimental_rerun()
+                st.rerun()  # Changed from experimental_rerun
 
     # Shopping list input
     st.header("Your Shopping List")
@@ -370,7 +370,7 @@ if not st.session_state.order_placed:
                         st.session_state.shopping_list = []
                         
                         # Rerun to show confirmation screen
-                        st.experimental_rerun()
+                        st.rerun()  # Changed from experimental_rerun
             
             # Buy button for best marketplace (outside the expanders)
             st.subheader("Ready to Purchase?")
@@ -425,7 +425,7 @@ if not st.session_state.order_placed:
                 st.session_state.shopping_list = []
                 
                 # Rerun to show confirmation screen
-                st.experimental_rerun()
+                st.rerun()  # Changed from experimental_rerun
 
     # Display welcome message for first-time users
     if not st.session_state.shopping_list and not st.session_state.comparison_results:
@@ -437,12 +437,12 @@ if not st.session_state.order_placed:
         with col1:
             if st.button("Milk, Bread, Eggs"):
                 st.session_state.shopping_list = ["Milk", "Bread", "Eggs"]
-                st.experimental_rerun()
+                st.rerun()  # Changed from experimental_rerun
         with col2:
             if st.button("Rice, Flour, Soap"):
                 st.session_state.shopping_list = ["Rice", "Flour", "Soap"]
-                st.experimental_rerun()
+                st.rerun()  # Changed from experimental_rerun
         with col3:
             if st.button("Vegetables, Fruits"):
                 st.session_state.shopping_list = ["Vegetables", "Fruits"]
-                st.experimental_rerun()
+                st.rerun()  # Changed from experimental_rerun
