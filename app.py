@@ -4,7 +4,7 @@ from datetime import datetime
 import pandas as pd
 import json
 import time
-import plotly.express as px
+import plotly.express as px  # This was the missing import
 from dotenv import load_dotenv
 
 # Import project modules
@@ -13,6 +13,7 @@ from database.db_manager import DatabaseManager
 from utils.price_scraper import PriceComparer
 from utils.payment_handler import PaymentProcessor
 from agents.shopping_agent import ShoppingAgent
+
 
 # Load environment variables
 load_dotenv()
