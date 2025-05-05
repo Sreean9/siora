@@ -127,7 +127,7 @@ def update_budget_remaining_chart():
     return fig, df
 
 # App header
-st.title("🛒 Siora - Shopping Optimization Agent")
+st.title("🛒 Siora - Your Shopping Buddy")
 st.write("Compare prices across marketplaces to save money!")
 
 # Display order confirmation message if an order was just placed
