@@ -87,10 +87,7 @@ def create_logo():
     
     # Draw main text (bright white)
     d.text((x, y), text, font=font_main, fill=(255, 255, 255))
-    
-    # Add a subtle tagline
-    tagline = "AI Shopping Assistant"
-    
+        
     try:
         # Try for a smaller font for the tagline
         font_small = ImageFont.truetype("Arial.ttf", 18)
