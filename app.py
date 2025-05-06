@@ -16,50 +16,13 @@ def create_logo():
     # Create a BytesIO object
     buffered = BytesIO()
     
-    # Create a new image with a gradient blue background
-    width, height = 240, 100
-    img = Image.new('RGB', (width, height), color=(30, 136, 229))
+    # Create a new image with a blue background
+    img = Image.new('RGB', (200, 80), (30, 136, 229))
+    d = ImageDraw.Draw(img)
     
-    # Create gradient background
-    draw = ImageDraw.Draw(img)
-    for y in range(height):
-        r = int(30 + (25 * y / height))
-        g = int(136 + (14 * y / height))
-        b = int(229 - (30 * y / height))
-        draw.line([(0, y), (width, y)], fill=(r, g, b), width=1)
-    
-    # Draw a shopping cart icon
-    cart_color = (255, 255, 255)
-    
-    # Cart base
-    draw.rectangle([(40, 50), (70, 55)], fill=cart_color)
-    
-    # Cart basket
-    draw.polygon([(40, 50), (40, 35), (65, 35), (70, 50)], outline=cart_color, width=2)
-    
-    # Cart wheels
-    draw.ellipse([(43, 53), (49, 59)], outline=cart_color, width=2)
-    draw.ellipse([(61, 53), (67, 59)], outline=cart_color, width=2)
-    
-    # Handle
-    draw.arc([(35, 25), (45, 45)], 180, 270, fill=cart_color, width=2)
-    
-    # Add text with better positioning
-    try:
-        # Try to create a larger, bold font for "SIORA"
-        title_font = ImageFont.truetype("arial.ttf", 32)
-    except IOError:
-        title_font = None
-        
-    try:
-        # Try to create a smaller font for tagline
-        tagline_font = ImageFont.truetype("arial.ttf", 14)
-    except IOError:
-        tagline_font = None
-    
-    # Draw text
-    draw.text((85, 30), "SIORA", fill=(255, 255, 255), font=title_font)
-    draw.text((85, 65), "Shop smarter, save more", fill=(220, 255, 255), font=tagline_font)
+    # Add text to the image
+    d.text((40, 20), "SIORA", fill=(255, 255, 255))
+    d.text((40, 50), "Shop smarter", fill=(220, 255, 255))
     
     # Save the image to the BytesIO object
     img.save(buffered, format="PNG")
