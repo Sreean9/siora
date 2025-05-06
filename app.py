@@ -27,8 +27,8 @@ def create_logo():
 
     # Add stylized text
     try:
-        font_big = ImageFont.truetype("arialbd.ttf", 32)
-        font_small = ImageFont.truetype("arial.ttf", 18)
+        font_big = ImageFont.truetype("arialbd.ttf", 80)
+        font_small = ImageFont.truetype("arial.ttf", 50)
     except:
         font_big = font_small = None  # fallback to default
 
