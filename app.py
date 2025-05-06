@@ -16,13 +16,45 @@ def create_logo():
     # Create a BytesIO object
     buffered = BytesIO()
     
-    # Create a new image with a blue background
-    img = Image.new('RGB', (200, 80), (30, 136, 229))
-    d = ImageDraw.Draw(img)
+    # Create a new image with a gradient blue background
+    width, height = 240, 100
+    img = Image.new('RGB', (width, height), color=(30, 136, 229))
     
-    # Add text to the image
-    d.text((40, 20), "SIORA", fill=(255, 255, 255))
-    d.text((40, 50), "Shop smarter", fill=(220, 255, 255))
+    # Create gradient background
+    draw = ImageDraw.Draw(img)
+    for y in range(height):
+        r = int(30 + (25 * y / height))
+        g = int(136 + (14 * y / height))
+        b = int(229 - (30 * y / height))
+        draw.line([(0, y), (width, y)], fill=(r, g, b), width=1)
+    
+    # Draw a shopping cart icon
+    cart_color = (255, 255, 255)
+    
+    # Cart base
+    draw.rectangle([(30, 55), (60, 60)], fill=cart_color)
+    
+    # Cart basket
+    draw.polygon([(30, 55), (30, 40), (55, 40), (60, 55)], outline=cart_color, width=2)
+    
+    # Cart wheels
+    draw.ellipse([(33, 58), (39, 64)], outline=cart_color, width=2)
+    draw.ellipse([(51, 58), (57, 64)], outline=cart_color, width=2)
+    
+    # Handle
+    draw.arc([(25, 30), (35, 50)], 180, 270, fill=cart_color, width=2)
+    
+    # Add text without font specification (uses default)
+    # SIORA text - larger
+    draw.text((80, 25), "S", fill=(255, 255, 255))
+    draw.text((90, 25), "I", fill=(255, 255, 255))
+    draw.text((95, 25), "O", fill=(255, 255, 255))
+    draw.text((105, 25), "R", fill=(255, 255, 255))
+    draw.text((115, 25), "A", fill=(255, 255, 255))
+    
+    # Tagline - smaller
+    tagline = "Shop smarter, save more"
+    draw.text((80, 60), tagline, fill=(220, 255, 255))
     
     # Save the image to the BytesIO object
     img.save(buffered, format="PNG")
