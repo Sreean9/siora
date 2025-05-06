@@ -18,33 +18,39 @@ def create_logo():
     img = Image.new('RGB', (width, height), color=0)
     d = ImageDraw.Draw(img)
 
-    # Gradient background
+    # Gradient blue background
     for y in range(height):
-        r = int(30 + (100 - 30) * (y / height))
-        g = int(136 + (200 - 136) * (y / height))
+        r = int(30 + (70 - 30) * (y / height))
+        g = int(136 + (190 - 136) * (y / height))
         b = int(229 + (255 - 229) * (y / height))
         d.line([(0, y), (width, y)], fill=(r, g, b))
 
-    # Add stylized text
+    # Load fonts with fallback
     try:
-        font_big = ImageFont.truetype("arialbd.ttf", 80)
-        font_small = ImageFont.truetype("arial.ttf", 50)
+        font_main = ImageFont.truetype("arialbd.ttf", 48)  # Use bold font if available
     except:
-        font_big = font_small = None  # fallback to default
+        font_main = ImageFont.load_default()
 
-    d.text((100,50), "SIORA", fill="white", font=font_big)
-    
+    # Centered text
+    text = "SIORA"
+    text_width, text_height = d.textsize(text, font=font_main)
+    x = (width - text_width) // 2
+    y = (height - text_height) // 2
 
-    # Add a simple cart icon using shapes
-    cart_color = (255, 255, 255)
-    d.rectangle([30, 35, 50, 55], outline=cart_color, width=2)  # cart body
-    d.line([(30, 35), (25, 30)], fill=cart_color, width=2)  # handle
-    d.ellipse([28, 55, 32, 59], fill=cart_color)  # left wheel
-    d.ellipse([48, 55, 52, 59], fill=cart_color)  # right wheel
+    # Add glowing effect (optional)
+    glow_color = (255, 255, 255)
+    for offset in range(1, 4):
+        d.text((x - offset, y), text, font=font_main, fill=glow_color)
+        d.text((x + offset, y), text, font=font_main, fill=glow_color)
+        d.text((x, y - offset), text, font=font_main, fill=glow_color)
+        d.text((x, y + offset), text, font=font_main, fill=glow_color)
 
+    # Main white text
+    d.text((x, y), text, font=font_main, fill=(255, 255, 255))
+
+    # Save and return as base64
     img.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
-
     return img_str
 # Custom CSS for colorful design
 def apply_custom_css():
