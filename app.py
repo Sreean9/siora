@@ -318,9 +318,9 @@ if st.session_state.order_placed:
         st.session_state.transaction_history.append(transaction)
         
         # Updated grocery spending chart
-       st.subheader("Updated Budget Status")
-          spending_fig = create_grocery_spending_chart()
-          st.plotly_chart(spending_fig, use_container_width=True, key="order_confirmation_chart")
+        st.subheader("Updated Budget Status")
+        spending_fig = create_grocery_spending_chart()
+        st.plotly_chart(spending_fig, use_container_width=True, key="order_confirmation_chart")
         
         # Transaction history
         st.markdown("""
@@ -701,13 +701,13 @@ with tab2:
         """, unsafe_allow_html=True)
         
         # Show budget allocation pie chart
-if st.session_state.grocery_budget > 0 or st.session_state.household_budget > 0:
-    allocation_fig = create_budget_allocation_chart()
-    st.plotly_chart(allocation_fig, use_container_width=True, key="budget_allocation_chart")
-    
-    # Show grocery spending pie chart
-    spending_fig = create_grocery_spending_chart()
-    st.plotly_chart(spending_fig, use_container_width=True, key="budget_spending_chart")
+        if st.session_state.grocery_budget > 0 or st.session_state.household_budget > 0:
+            allocation_fig = create_budget_allocation_chart()
+            st.plotly_chart(allocation_fig, use_container_width=True, key="budget_allocation_chart")
+            
+            # Show grocery spending pie chart
+            spending_fig = create_grocery_spending_chart()
+            st.plotly_chart(spending_fig, use_container_width=True, key="budget_spending_chart")
     
     # Monthly spending summary
     st.markdown("""
