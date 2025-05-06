@@ -32,29 +32,34 @@ def create_logo():
     cart_color = (255, 255, 255)
     
     # Cart base
-    draw.rectangle([(30, 55), (60, 60)], fill=cart_color)
+    draw.rectangle([(40, 50), (70, 55)], fill=cart_color)
     
     # Cart basket
-    draw.polygon([(30, 55), (30, 40), (55, 40), (60, 55)], outline=cart_color, width=2)
+    draw.polygon([(40, 50), (40, 35), (65, 35), (70, 50)], outline=cart_color, width=2)
     
     # Cart wheels
-    draw.ellipse([(33, 58), (39, 64)], outline=cart_color, width=2)
-    draw.ellipse([(51, 58), (57, 64)], outline=cart_color, width=2)
+    draw.ellipse([(43, 53), (49, 59)], outline=cart_color, width=2)
+    draw.ellipse([(61, 53), (67, 59)], outline=cart_color, width=2)
     
     # Handle
-    draw.arc([(25, 30), (35, 50)], 180, 270, fill=cart_color, width=2)
+    draw.arc([(35, 25), (45, 45)], 180, 270, fill=cart_color, width=2)
     
-    # Add text without font specification (uses default)
-    # SIORA text - larger
-    draw.text((80, 25), "S", fill=(255, 255, 255))
-    draw.text((90, 25), "I", fill=(255, 255, 255))
-    draw.text((95, 25), "O", fill=(255, 255, 255))
-    draw.text((105, 25), "R", fill=(255, 255, 255))
-    draw.text((115, 25), "A", fill=(255, 255, 255))
+    # Add text with better positioning
+    try:
+        # Try to create a larger, bold font for "SIORA"
+        title_font = ImageFont.truetype("arial.ttf", 32)
+    except IOError:
+        title_font = None
+        
+    try:
+        # Try to create a smaller font for tagline
+        tagline_font = ImageFont.truetype("arial.ttf", 14)
+    except IOError:
+        tagline_font = None
     
-    # Tagline - smaller
-    tagline = "Shop smarter, save more"
-    draw.text((80, 60), tagline, fill=(220, 255, 255))
+    # Draw text
+    draw.text((85, 30), "SIORA", fill=(255, 255, 255), font=title_font)
+    draw.text((85, 65), "Shop smarter, save more", fill=(220, 255, 255), font=tagline_font)
     
     # Save the image to the BytesIO object
     img.save(buffered, format="PNG")
@@ -63,7 +68,6 @@ def create_logo():
     img_str = base64.b64encode(buffered.getvalue()).decode()
     
     return img_str
-
 # Custom CSS for colorful design
 def apply_custom_css():
     st.markdown("""
