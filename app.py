@@ -34,7 +34,7 @@ def create_logo():
     # Get text size using getbbox
     text = "SIORA"
     bbox = font_main.getbbox(text)
-    text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    text_width, text_height = bbox[6] - bbox[0], bbox[4] - bbox[1]
     x = (width - text_width) // 2
     y = (height - text_height) // 2
 
