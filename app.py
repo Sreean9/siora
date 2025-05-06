@@ -16,61 +16,106 @@ def create_logo():
     buffered = BytesIO()
     width, height = 400, 120
     
-    # Create a new image with dark background
-    img = Image.new('RGB', (width, height), color=(10, 15, 30))
+    # Create a new image with black background
+    img = Image.new('RGB', (width, height), color=(0, 0, 0))
     d = ImageDraw.Draw(img)
     
-    # Draw a horizontal blue accent line at the bottom
-    accent_y = height - 20
+    # Create a subtle gradient background
+    for y in range(height):
+        # Dark blue-purple gradient
+        r = int(5 + (15 * y / height))
+        g = int(5 + (20 * y / height))
+        b = int(20 + (40 * y / height))
+        d.line([(0, y), (width, y)], fill=(r, g, b))
+    
+    # Draw a horizontal accent line
+    line_y = height - 30
     for x in range(width):
-        # Gradient blue line
-        blue_intensity = 100 + int(100 * (x / width))
-        d.point((x, accent_y), fill=(0, blue_intensity, 255))
+        # Create a pulsing effect without using math library
+        position_factor = x / width
+        if position_factor < 0.5:
+            intensity = int(200 * (position_factor * 2))
+        else:
+            intensity = int(200 * (2 - position_factor * 2))
+        d.point((x, line_y), fill=(intensity, intensity, intensity))
     
-    # Draw main text "SIORA"
+    # Draw main text "SIORA" with a glow effect
     text = "SIORA"
-    font = ImageFont.load_default()
     
-    # Make the text as large as possible
-    # Center the text
-    x = width // 2 - 60  # Estimated center for "SIORA" with default font
-    y = height // 2 - 20
+    # Try to use a larger font size
+    font_size = 80
     
-    # Draw text with a subtle glow effect
-    # Glow
-    for dx in [-2, -1, 1, 2]:
-        for dy in [-2, -1, 1, 2]:
-            d.text((x+dx, y+dy), text, font=font, fill=(0, 80, 160))
-    
-    # Main text (bright)
-    d.text((x, y), text, font=font, fill=(255, 255, 255))
-    
-    # Add big letter spacing to make it more visually appealing
-    # Draw individual letters with spacing
-    spacing = 20
-    letters = list(text)
-    letter_x = width // 2 - (len(letters) * spacing) // 2
-    for letter in letters:
-        # Draw each letter with glow
-        for dx in [-1, 0, 1]:
-            for dy in [-1, 0, 1]:
-                if dx != 0 or dy != 0:  # Skip the center position (will be drawn later)
-                    d.text((letter_x+dx, y+dy), letter, font=font, fill=(0, 100, 200))
+    try:
+        # Try different font options that might be available
+        font_options = ["Arial.ttf", "arialbd.ttf", "DejaVuSans-Bold.ttf", "Roboto-Bold.ttf"]
+        font_main = None
         
-        # Draw the letter in white
-        d.text((letter_x, y), letter, font=font, fill=(255, 255, 255))
-        letter_x += spacing
+        for font_name in font_options:
+            try:
+                font_main = ImageFont.truetype(font_name, font_size)
+                break
+            except:
+                continue
+                
+        if not font_main:
+            # If no font found, use default
+            font_main = ImageFont.load_default()
+    except:
+        # Fallback to default font
+        font_main = ImageFont.load_default()
     
-    # Add a tagline
+    # Get text dimensions
+    try:
+        # For newer Pillow versions
+        bbox = font_main.getbbox(text)
+        text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    except:
+        # Fallback method for older Pillow versions
+        text_width, text_height = d.textsize(text, font=font_main)
+    
+    # Center text
+    x = (width - text_width) // 2
+    y = (height - text_height) // 2 - 10  # Slight upward adjustment
+    
+    # Draw glow effect (subtle blue glow)
+    for offset in range(3, 0, -1):
+        glow_color = (0, 70 + offset * 20, 150 + offset * 30)
+        d.text((x-offset, y-offset), text, font=font_main, fill=glow_color)
+        d.text((x+offset, y-offset), text, font=font_main, fill=glow_color)
+        d.text((x-offset, y+offset), text, font=font_main, fill=glow_color)
+        d.text((x+offset, y+offset), text, font=font_main, fill=glow_color)
+    
+    # Draw main text (bright white)
+    d.text((x, y), text, font=font_main, fill=(255, 255, 255))
+    
+    # Add a subtle tagline
     tagline = "AI Shopping Assistant"
-    tagline_x = width // 2 - len(tagline) * 3  # Rough center estimation
-    tagline_y = y + 25
-    d.text((tagline_x, tagline_y), tagline, font=font, fill=(200, 200, 255))
+    
+    try:
+        # Try for a smaller font for the tagline
+        font_small = ImageFont.truetype("Arial.ttf", 18)
+    except:
+        # Fallback
+        font_small = ImageFont.load_default()
+    
+    # Center tagline
+    try:
+        # For newer Pillow versions
+        tagline_bbox = font_small.getbbox(tagline)
+        tagline_width = tagline_bbox[2] - tagline_bbox[0]
+    except:
+        # Fallback method
+        tagline_width, _ = d.textsize(tagline, font=font_small)
+    
+    tagline_x = (width - tagline_width) // 2
+    tagline_y = y + text_height + 10
+    
+    # Draw tagline
+    d.text((tagline_x, tagline_y), tagline, font=font_small, fill=(180, 180, 255))
     
     # Convert to base64
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
-
 # Custom CSS for colorful design
 def apply_custom_css():
     st.markdown("""
