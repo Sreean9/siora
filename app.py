@@ -344,7 +344,7 @@ with col2:
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
         <img src="data:image/png;base64,{logo_img}" style="height: 80px;">
         <div style="margin-left: 20px;">
-            <h1 style="margin: 0; color: #2962FF;">The Shopping Buddy</h1>
+            <h1 style="margin: 0; color: #2962FF;">Your Shopping Buddy</h1>
             <p style="margin: 0; color: #666;">Compare prices, track budgets, shop smarter</p>
         </div>
     </div>
@@ -455,7 +455,7 @@ with tab1:
         # Shopping list input
         st.markdown("""
         <div class="highlight-card">
-            <h2 style="margin-top: 0;">Your Shopping List</h2>
+            <h2 style="margin-top: 0;">Create Shopping List</h2>
             <p>Enter the items you want to buy, separated by commas</p>
         </div>
         """, unsafe_allow_html=True)
