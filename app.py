@@ -32,8 +32,8 @@ def create_logo():
     except:
         font_big = font_small = None  # fallback to default
 
-    d.text((90, 25), "SIORA", fill="white", font=font_big)
-    d.text((90, 60), "Shop smarter", fill=(240, 255, 255), font=font_small)
+    d.text((90,50), "SIORA", fill="white", font=font_big)
+    
 
     # Add a simple cart icon using shapes
     cart_color = (255, 255, 255)
