@@ -43,7 +43,7 @@ def create_logo():
     text = "SIORA"
     
     # Try to use a larger font size
-    font_size = 40
+    font_size = 48
     
     try:
         # Try different font options that might be available
