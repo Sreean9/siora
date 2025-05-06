@@ -25,33 +25,33 @@ def create_logo():
         b = int(229 + (255 - 229) * (y / height))
         d.line([(0, y), (width, y)], fill=(r, g, b))
 
-    # Load fonts with fallback
+    # Load bold font
     try:
-        font_main = ImageFont.truetype("arialbd.ttf", 48)  # Use bold font if available
+        font_main = ImageFont.truetype("arialbd.ttf", 48)
     except:
         font_main = ImageFont.load_default()
 
-    # Centered text
-    text = "SIORA"
-    text_width, text_height = d.textsize(text, font=font_main)
+    # Use getbbox for measuring text size
+    bbox = font_main.getbbox("SIORA")
+    text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
     x = (width - text_width) // 2
     y = (height - text_height) // 2
 
-    # Add glowing effect (optional)
+    # Optional glow effect
     glow_color = (255, 255, 255)
-    for offset in range(1, 4):
-        d.text((x - offset, y), text, font=font_main, fill=glow_color)
-        d.text((x + offset, y), text, font=font_main, fill=glow_color)
-        d.text((x, y - offset), text, font=font_main, fill=glow_color)
-        d.text((x, y + offset), text, font=font_main, fill=glow_color)
+    for offset in range(1, 3):
+        d.text((x - offset, y), "SIORA", font=font_main, fill=glow_color)
+        d.text((x + offset, y), "SIORA", font=font_main, fill=glow_color)
+        d.text((x, y - offset), "SIORA", font=font_main, fill=glow_color)
+        d.text((x, y + offset), "SIORA", font=font_main, fill=glow_color)
 
-    # Main white text
-    d.text((x, y), text, font=font_main, fill=(255, 255, 255))
+    # Draw main text
+    d.text((x, y), "SIORA", font=font_main, fill=(255, 255, 255))
 
-    # Save and return as base64
+    # Return base64 image
     img.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode()
-    return img_str
+    return base64.b64encode(buffered.getvalue()).decode()
+
 # Custom CSS for colorful design
 def apply_custom_css():
     st.markdown("""
