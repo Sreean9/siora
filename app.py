@@ -14,36 +14,63 @@ st.set_page_config(page_title="Siora - Shopping Assistant", page_icon="🛒", la
 # Create Siora logo (since we can't include external files)
 def create_logo():
     buffered = BytesIO()
-    width, height = 300, 100
-    img = Image.new('RGB', (width, height), color=0)
+    width, height = 400, 120
+    
+    # Create a new image with dark background
+    img = Image.new('RGB', (width, height), color=(10, 15, 30))
     d = ImageDraw.Draw(img)
-
-    # Gradient background
-    #for y in range(height):
-       # r = int(30 + (70 - 30) * (y / height))
-       # g = int(136 + (190 - 136) * (y / height))
-       # b = int(229 + (255 - 229) * (y / height))
-       # d.line([(0, y), (width, y)], fill=(r, g, b))
-
-    # Try loading a bold font
-    try:
-        font_main = ImageFont.truetype("arialbd.ttf", 56)
-    except:
-        font_main = ImageFont.load_default()
-
-    # Get text size using getbbox
+    
+    # Draw a horizontal blue accent line at the bottom
+    accent_y = height - 20
+    for x in range(width):
+        # Gradient blue line
+        blue_intensity = 100 + int(100 * (x / width))
+        d.point((x, accent_y), fill=(0, blue_intensity, 255))
+    
+    # Draw main text "SIORA"
     text = "SIORA"
-    bbox = font_main.getbbox(text)
-    text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    x = (width - text_width) // 2
-    y = (height - text_height) // 2
-
-    # Draw main text (simple white)
-    d.text((x, y), text, font=font_main, fill=(255, 255, 255))
-
+    font = ImageFont.load_default()
+    
+    # Make the text as large as possible
+    # Center the text
+    x = width // 2 - 60  # Estimated center for "SIORA" with default font
+    y = height // 2 - 20
+    
+    # Draw text with a subtle glow effect
+    # Glow
+    for dx in [-2, -1, 1, 2]:
+        for dy in [-2, -1, 1, 2]:
+            d.text((x+dx, y+dy), text, font=font, fill=(0, 80, 160))
+    
+    # Main text (bright)
+    d.text((x, y), text, font=font, fill=(255, 255, 255))
+    
+    # Add big letter spacing to make it more visually appealing
+    # Draw individual letters with spacing
+    spacing = 20
+    letters = list(text)
+    letter_x = width // 2 - (len(letters) * spacing) // 2
+    for letter in letters:
+        # Draw each letter with glow
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                if dx != 0 or dy != 0:  # Skip the center position (will be drawn later)
+                    d.text((letter_x+dx, y+dy), letter, font=font, fill=(0, 100, 200))
+        
+        # Draw the letter in white
+        d.text((letter_x, y), letter, font=font, fill=(255, 255, 255))
+        letter_x += spacing
+    
+    # Add a tagline
+    tagline = "AI Shopping Assistant"
+    tagline_x = width // 2 - len(tagline) * 3  # Rough center estimation
+    tagline_y = y + 25
+    d.text((tagline_x, tagline_y), tagline, font=font, fill=(200, 200, 255))
+    
     # Convert to base64
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
+
 # Custom CSS for colorful design
 def apply_custom_css():
     st.markdown("""
