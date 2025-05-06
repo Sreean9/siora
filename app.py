@@ -319,8 +319,8 @@ if st.session_state.order_placed:
         
         # Updated grocery spending chart
        st.subheader("Updated Budget Status")
-spending_fig = create_grocery_spending_chart()
-st.plotly_chart(spending_fig, use_container_width=True, key="order_confirmation_chart")
+          spending_fig = create_grocery_spending_chart()
+          st.plotly_chart(spending_fig, use_container_width=True, key="order_confirmation_chart")
         
         # Transaction history
         st.markdown("""
