@@ -6,30 +6,45 @@ import plotly.express as px
 import datetime
 import base64
 from io import BytesIO
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 # App configuration
 st.set_page_config(page_title="Siora - Shopping Assistant", page_icon="🛒", layout="wide")
 
 # Create Siora logo (since we can't include external files)
 def create_logo():
-    # Create a BytesIO object
     buffered = BytesIO()
-    
-    # Create a new image with a blue background
-    img = Image.new('RGB', (200, 80), (30, 136, 229))
+    width, height = 300, 100
+    img = Image.new('RGB', (width, height), color=0)
     d = ImageDraw.Draw(img)
-    
-    # Add text to the image
-    d.text((40, 20), "SIORA", fill=(255, 255, 255))
-    d.text((40, 50), "Shop smarter", fill=(220, 255, 255))
-    
-    # Save the image to the BytesIO object
+
+    # Gradient background
+    for y in range(height):
+        r = int(30 + (100 - 30) * (y / height))
+        g = int(136 + (200 - 136) * (y / height))
+        b = int(229 + (255 - 229) * (y / height))
+        d.line([(0, y), (width, y)], fill=(r, g, b))
+
+    # Add stylized text
+    try:
+        font_big = ImageFont.truetype("arialbd.ttf", 32)
+        font_small = ImageFont.truetype("arial.ttf", 18)
+    except:
+        font_big = font_small = None  # fallback to default
+
+    d.text((90, 25), "SIORA", fill="white", font=font_big)
+    d.text((90, 60), "Shop smarter", fill=(240, 255, 255), font=font_small)
+
+    # Add a simple cart icon using shapes
+    cart_color = (255, 255, 255)
+    d.rectangle([30, 35, 50, 55], outline=cart_color, width=2)  # cart body
+    d.line([(30, 35), (25, 30)], fill=cart_color, width=2)  # handle
+    d.ellipse([28, 55, 32, 59], fill=cart_color)  # left wheel
+    d.ellipse([48, 55, 52, 59], fill=cart_color)  # right wheel
+
     img.save(buffered, format="PNG")
-    
-    # Get the image as a base64 string
     img_str = base64.b64encode(buffered.getvalue()).decode()
-    
+
     return img_str
 # Custom CSS for colorful design
 def apply_custom_css():
