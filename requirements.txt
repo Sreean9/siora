@@ -8,3 +8,4 @@ python-dotenv==1.0.0
 plotly==5.15.0
 stripe==7.9.0
 aiohttp==3.9.1
+pillow==10.0.0
