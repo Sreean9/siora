@@ -19,11 +19,11 @@ def create_logo():
     d = ImageDraw.Draw(img)
 
     # Gradient background
-    for y in range(height):
-        r = int(30 + (70 - 30) * (y / height))
-        g = int(136 + (190 - 136) * (y / height))
-        b = int(229 + (255 - 229) * (y / height))
-        d.line([(0, y), (width, y)], fill=(r, g, b))
+    #for y in range(height):
+       # r = int(30 + (70 - 30) * (y / height))
+       # g = int(136 + (190 - 136) * (y / height))
+       # b = int(229 + (255 - 229) * (y / height))
+       # d.line([(0, y), (width, y)], fill=(r, g, b))
 
     # Try loading a bold font
     try:
