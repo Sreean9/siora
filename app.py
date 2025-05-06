@@ -18,40 +18,32 @@ def create_logo():
     img = Image.new('RGB', (width, height), color=0)
     d = ImageDraw.Draw(img)
 
-    # Gradient blue background
+    # Gradient background
     for y in range(height):
         r = int(30 + (70 - 30) * (y / height))
         g = int(136 + (190 - 136) * (y / height))
         b = int(229 + (255 - 229) * (y / height))
         d.line([(0, y), (width, y)], fill=(r, g, b))
 
-    # Load bold font
+    # Try loading a bold font
     try:
-        font_main = ImageFont.truetype("arialbd.ttf", 48)
+        font_main = ImageFont.truetype("arialbd.ttf", 56)
     except:
         font_main = ImageFont.load_default()
 
-    # Use getbbox for measuring text size
-    bbox = font_main.getbbox("SIORA")
+    # Get text size using getbbox
+    text = "SIORA"
+    bbox = font_main.getbbox(text)
     text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
     x = (width - text_width) // 2
     y = (height - text_height) // 2
 
-    # Optional glow effect
-    glow_color = (255, 255, 255)
-    for offset in range(1, 3):
-        d.text((x - offset, y), "SIORA", font=font_main, fill=glow_color)
-        d.text((x + offset, y), "SIORA", font=font_main, fill=glow_color)
-        d.text((x, y - offset), "SIORA", font=font_main, fill=glow_color)
-        d.text((x, y + offset), "SIORA", font=font_main, fill=glow_color)
+    # Draw main text (simple white)
+    d.text((x, y), text, font=font_main, fill=(255, 255, 255))
 
-    # Draw main text
-    d.text((x, y), "SIORA", font=font_main, fill=(255, 255, 255))
-
-    # Return base64 image
+    # Convert to base64
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
-
 # Custom CSS for colorful design
 def apply_custom_css():
     st.markdown("""
