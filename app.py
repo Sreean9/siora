@@ -43,7 +43,7 @@ def create_logo():
     text = "SIORA"
     
     # Try to use a larger font size
-    font_size = 80
+    font_size = 60
     
     try:
         # Try different font options that might be available
@@ -87,7 +87,10 @@ def create_logo():
     
     # Draw main text (bright white)
     d.text((x, y), text, font=font_main, fill=(255, 255, 255))
-        
+    
+    # Add a subtle tagline
+    tagline = "AI Shopping Assistant"
+    
     try:
         # Try for a smaller font for the tagline
         font_small = ImageFont.truetype("Arial.ttf", 18)
@@ -113,6 +116,7 @@ def create_logo():
     # Convert to base64
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
+
 # Custom CSS for colorful design
 def apply_custom_css():
     st.markdown("""
