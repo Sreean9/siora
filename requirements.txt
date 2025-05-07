@@ -2,8 +2,3 @@ streamlit==1.32.0
 pandas==2.1.1
 plotly==5.15.0
 pillow==10.0.0
-python-dotenv==1.0.0
-# For voice input
-sounddevice==0.4.6
-scipy==1.11.3
-requests==2.31.0
