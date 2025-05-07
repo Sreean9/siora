@@ -11,43 +11,36 @@ from PIL import Image, ImageDraw
 # App configuration
 st.set_page_config(page_title="Siora - Shopping Assistant", page_icon="🛒", layout="wide")
 
-# Create Siora logo
-def create_logo():
-    # Create a simple logo without using ImageFont
-    buffered = BytesIO()
-    width, height = 300, 100
-    img = Image.new('RGB', (width, height), color=0)
-    d = ImageDraw.Draw(img)
-
-    # Draw text directly without font specification
-    text = "SIORA"
-    # Position text in the center approximately
-    x = width // 2 - 50
-    y = height // 2 - 10
-    
-    # Draw a simple white text
-    d.text((x, y), text, fill=(255, 255, 255))
-    
-    # Draw a blue accent line at the bottom
-    line_y = height - 20
-    for x in range(width):
-        blue_intensity = 100 + int(100 * (x / width))
-        d.point((x, line_y), fill=(0, blue_intensity, 255))
-
-    # Convert to base64
-    img.save(buffered, format="PNG")
-    return base64.b64encode(buffered.getvalue()).decode()
-
-# Function to simulate voice input (for demo purposes)
-def simulate_voice_input():
-    """Simulate voice transcription for demonstration purposes"""
-    options = [
-        "milk, bread, eggs",
-        "rice, dal, flour, oil",
-        "vegetables, fruits, spices",
-        "soap, detergent, toothpaste"
+# Function to simulate Vaani Hindi to English translation
+def simulate_vaani_translation():
+    """
+    Simulate Hindi to English translation using Vaani API.
+    For the hackathon demo, this simulates the process.
+    """
+    # Hindi phrases and their English translations
+    hindi_english_samples = [
+        {
+            "hindi": "दूध, रोटी, और अंडे",
+            "english": "milk, bread, and eggs"
+        },
+        {
+            "hindi": "चावल, दाल, आटा, और तेल",
+            "english": "rice, lentils, flour, and oil"
+        },
+        {
+            "hindi": "सब्जियां, फल, और मसाले",
+            "english": "vegetables, fruits, and spices"
+        },
+        {
+            "hindi": "साबुन, डिटर्जेंट, और टूथपेस्ट",
+            "english": "soap, detergent, and toothpaste"
+        }
     ]
-    return random.choice(options)
+    
+    # Randomly select a sample for the demo
+    sample = random.choice(hindi_english_samples)
+    
+    return sample
 
 # Function to display an advertisement
 def display_ad():
@@ -193,6 +186,26 @@ def apply_custom_css():
     .voice-button:hover {
         background-color: #FF9E40;
     }
+    
+    /* Custom tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        background-color: white;
+        border-radius: 4px 4px 0px 0px;
+        gap: 1px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background-color: #f0f7ff;
+        border-bottom: 3px solid #2962FF;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -264,19 +277,18 @@ def create_grocery_spending_chart():
     
     return fig
 
-# Display logo and app title
-logo_img = create_logo()
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.markdown(f"""
-    <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        <img src="data:image/png;base64,{logo_img}" style="height: 80px;">
-        <div style="margin-left: 20px;">
-            <h1 style="margin: 0; color: #2962FF;">Shopping Optimization Agent</h1>
-            <p style="margin: 0; color: #666;">Compare prices, track budgets, shop smarter</p>
-        </div>
+# Display improved header
+st.markdown("""
+<div style="display: flex; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #2962FF, #1565C0); padding: 25px; color: white; text-align: center; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
+        <h1 style="font-size: 2.8rem; margin: 0; font-weight: bold;">SIORA</h1>
     </div>
-    """, unsafe_allow_html=True)
+    <div style="padding: 20px 30px; flex: 1;">
+        <h1 style="color: #2962FF; margin: 0 0 5px 0; font-size: 2.4rem;">Shopping Optimization Agent</h1>
+        <p style="color: #555; margin: 0; font-size: 1.1rem;">Compare prices, track budgets, shop smarter</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Main navigation tabs
 tab1, tab2, tab3 = st.tabs(["🛒 Shop", "📊 Budget", "📜 Transaction History"])
@@ -287,8 +299,9 @@ if st.session_state.order_placed:
     with tab1:
         # Create a highlighted order confirmation message
         st.markdown("""
-        <div class="success-message">
-            <h2 style="margin-top: 0;">✅ Your order has been placed successfully!</h2>
+        <div style="background-color: #00C853; color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 24px; margin-right: 10px;">✓</span>
+            <span style="font-size: 20px; font-weight: bold;">Your order has been placed successfully!</span>
         </div>
         """, unsafe_allow_html=True)
         
@@ -400,14 +413,33 @@ with tab1:
                                      label_visibility="collapsed")
         
         with col2:
-            # Voice input button
-            if st.button("🎤", help="Click to speak your shopping list"):
-                with st.spinner("Listening..."):
-                    time.sleep(1.5)  # Simulate listening time
-                    voice_text = simulate_voice_input()
-                    st.session_state.voice_text = voice_text
-                    st.success(f"Heard: {voice_text}")
-                    st.info("Hindi voice input would be translated to English text")
+            # Voice input button with better styling
+            if st.button("🎤", help="Click for Hindi voice input that will be translated to English"):
+                with st.spinner("Listening to Hindi speech..."):
+                    # Simulate processing time
+                    time.sleep(1.5)
+                    
+                    # Get simulated translation
+                    translation = simulate_vaani_translation()
+                    
+                    # Show the "detected" Hindi and translation
+                    st.info(f"Detected Hindi: **{translation['hindi']}**")
+                    time.sleep(0.8)  # Brief pause to simulate translation time
+                    
+                    # Show the English translation
+                    st.success(f"Translated to English: **{translation['english']}**")
+                    
+                    # Update the text input field with the English translation
+                    st.session_state.voice_text = translation['english']
+                    
+                    # Show integration message
+                    st.markdown("""
+                    <div style="background-color: #EDE7F6; padding: 10px; border-radius: 5px; border-left: 5px solid #673AB7; margin-top: 10px; font-size: 0.9em;">
+                        <b>Integration:</b> Using Vaani API for Hindi-to-English speech translation
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Rerun to update the UI
                     st.rerun()
         
         with col3:
