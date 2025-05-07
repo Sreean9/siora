@@ -13,33 +13,26 @@ st.set_page_config(page_title="Siora - Shopping Assistant", page_icon="🛒", la
 
 # Create Siora logo
 def create_logo():
+    # Create a simple logo without using ImageFont
     buffered = BytesIO()
     width, height = 300, 100
     img = Image.new('RGB', (width, height), color=0)
     d = ImageDraw.Draw(img)
 
-    # Gradient background
-    #for y in range(height):
-       # r = int(30 + (70 - 30) * (y / height))
-       # g = int(136 + (190 - 136) * (y / height))
-       # b = int(229 + (255 - 229) * (y / height))
-       # d.line([(0, y), (width, y)], fill=(r, g, b))
-
-    # Try loading a bold font
-    try:
-        font_main = ImageFont.truetype("arialbd.ttf", 56)
-    except:
-        font_main = ImageFont.load_default()
-
-    # Get text size using getbbox
+    # Draw text directly without font specification
     text = "SIORA"
-    bbox = font_main.getbbox(text)
-    text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    x = (width - text_width) // 2
-    y = (height - text_height) // 2
-
-    # Draw main text (simple white)
-    d.text((x, y), text, font=font_main, fill=(255, 255, 255))
+    # Position text in the center approximately
+    x = width // 2 - 50
+    y = height // 2 - 10
+    
+    # Draw a simple white text
+    d.text((x, y), text, fill=(255, 255, 255))
+    
+    # Draw a blue accent line at the bottom
+    line_y = height - 20
+    for x in range(width):
+        blue_intensity = 100 + int(100 * (x / width))
+        d.point((x, line_y), fill=(0, blue_intensity, 255))
 
     # Convert to base64
     img.save(buffered, format="PNG")
