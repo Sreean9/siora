@@ -6,116 +6,84 @@ import plotly.express as px
 import datetime
 import base64
 from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 
 # App configuration
 st.set_page_config(page_title="Siora - Shopping Assistant", page_icon="🛒", layout="wide")
 
-# Create Siora logo (since we can't include external files)
+# Create Siora logo
 def create_logo():
     buffered = BytesIO()
     width, height = 400, 120
     
-    # Create a new image with black background
-    img = Image.new('RGB', (width, height), color=(0, 0, 0))
+    # Create a new image with dark background
+    img = Image.new('RGB', (width, height), color=(10, 15, 30))
     d = ImageDraw.Draw(img)
     
-    # Create a subtle gradient background
-    for y in range(height):
-        # Dark blue-purple gradient
-        r = int(5 + (15 * y / height))
-        g = int(5 + (20 * y / height))
-        b = int(20 + (40 * y / height))
-        d.line([(0, y), (width, y)], fill=(r, g, b))
-    
-    # Draw a horizontal accent line
-    line_y = height - 30
+    # Draw a horizontal blue accent line at the bottom
+    accent_y = height - 20
     for x in range(width):
-        # Create a pulsing effect without using math library
-        position_factor = x / width
-        if position_factor < 0.5:
-            intensity = int(200 * (position_factor * 2))
-        else:
-            intensity = int(200 * (2 - position_factor * 2))
-        d.point((x, line_y), fill=(intensity, intensity, intensity))
+        # Gradient blue line
+        blue_intensity = 100 + int(100 * (x / width))
+        d.point((x, accent_y), fill=(0, blue_intensity, 255))
     
-    # Draw main text "SIORA" with a glow effect
+    # Draw main text "SIORA"
     text = "SIORA"
+    font = ImageFont.load_default()
     
-    # Try to use a larger font size
-    font_size = 48
+    # Make the text as large as possible
+    # Center the text
+    x = width // 2 - 60  # Estimated center for "SIORA" with default font
+    y = height // 2 - 20
     
-    try:
-        # Try different font options that might be available
-        font_options = ["Arial.ttf", "arialbd.ttf", "DejaVuSans-Bold.ttf", "Roboto-Bold.ttf"]
-        font_main = None
+    # Draw text with a subtle glow effect
+    # Glow
+    for dx in [-2, -1, 1, 2]:
+        for dy in [-2, -1, 1, 2]:
+            d.text((x+dx, y+dy), text, font=font, fill=(0, 80, 160))
+    
+    # Main text (bright)
+    d.text((x, y), text, font=font, fill=(255, 255, 255))
+    
+    # Add big letter spacing to make it more visually appealing
+    # Draw individual letters with spacing
+    spacing = 20
+    letters = list(text)
+    letter_x = width // 2 - (len(letters) * spacing) // 2
+    for letter in letters:
+        # Draw each letter with glow
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                if dx != 0 or dy != 0:  # Skip the center position (will be drawn later)
+                    d.text((letter_x+dx, y+dy), letter, font=font, fill=(0, 100, 200))
         
-        for font_name in font_options:
-            try:
-                font_main = ImageFont.truetype(font_name, font_size)
-                break
-            except:
-                continue
-                
-        if not font_main:
-            # If no font found, use default
-            font_main = ImageFont.load_default()
-    except:
-        # Fallback to default font
-        font_main = ImageFont.load_default()
+        # Draw the letter in white
+        d.text((letter_x, y), letter, font=font, fill=(255, 255, 255))
+        letter_x += spacing
     
-    # Get text dimensions
-    try:
-        # For newer Pillow versions
-        bbox = font_main.getbbox(text)
-        text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    except:
-        # Fallback method for older Pillow versions
-        text_width, text_height = d.textsize(text, font=font_main)
-    
-    # Center text
-    x = (width - text_width) // 2
-    y = (height - text_height) // 2 - 10  # Slight upward adjustment
-    
-    # Draw glow effect (subtle blue glow)
-    for offset in range(3, 0, -1):
-        glow_color = (0, 70 + offset * 20, 150 + offset * 30)
-        d.text((x-offset, y-offset), text, font=font_main, fill=glow_color)
-        d.text((x+offset, y-offset), text, font=font_main, fill=glow_color)
-        d.text((x-offset, y+offset), text, font=font_main, fill=glow_color)
-        d.text((x+offset, y+offset), text, font=font_main, fill=glow_color)
-    
-    # Draw main text (bright white)
-    d.text((x, y), text, font=font_main, fill=(255, 255, 255))
-    
-    # Add a subtle tagline
+    # Add a tagline
     tagline = "AI Shopping Assistant"
-    
-    try:
-        # Try for a smaller font for the tagline
-        font_small = ImageFont.truetype("Arial.ttf", 18)
-    except:
-        # Fallback
-        font_small = ImageFont.load_default()
-    
-    # Center tagline
-    try:
-        # For newer Pillow versions
-        tagline_bbox = font_small.getbbox(tagline)
-        tagline_width = tagline_bbox[2] - tagline_bbox[0]
-    except:
-        # Fallback method
-        tagline_width, _ = d.textsize(tagline, font=font_small)
-    
-    tagline_x = (width - tagline_width) // 2
-    tagline_y = y + text_height + 10
-    
-    # Draw tagline
-    d.text((tagline_x, tagline_y), tagline, font=font_small, fill=(180, 180, 255))
+    tagline_x = width // 2 - len(tagline) * 3  # Rough center estimation
+    tagline_y = y + 25
+    d.text((tagline_x, tagline_y), tagline, font=font, fill=(200, 200, 255))
     
     # Convert to base64
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
+
+# Function to simulate voice transcription - for demo purposes
+def simulate_voice_transcription():
+    """Simulate voice transcription for demonstration purposes"""
+    # Predefined responses that would normally come from a voice API
+    example_translations = [
+        "milk, bread, eggs",
+        "rice, dal, flour, oil",
+        "vegetables, fruits, spices",
+        "soap, detergent, toothpaste"
+    ]
+    
+    # For the demo, randomly select from predefined responses
+    return random.choice(example_translations)
 
 # Custom CSS for colorful design
 def apply_custom_css():
@@ -200,25 +168,48 @@ def apply_custom_css():
         background-color: #e1f5fe;
     }
     
-    /* Buttons */
-    .primary-button {
-        background-color: var(--primary);
+    /* Voice button styling */
+    .voice-btn {
+        background-color: #FF6D00;
         color: white;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
         border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-weight: bold;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        margin: 0 auto;
     }
     
-    .secondary-button {
-        background-color: var(--secondary);
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-weight: bold;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    .voice-btn:hover {
+        background-color: #FF9E40;
+    }
+    
+    /* Ad space styling */
+    .ad-container {
+        background-color: #F0F2F5;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        border: 1px solid #E4E6E8;
+        text-align: center;
+    }
+    
+    .ad-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .ad-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -232,7 +223,7 @@ if "shopping_list" not in st.session_state:
 if "comparison_results" not in st.session_state:
     st.session_state.comparison_results = None
 if "monthly_spending" not in st.session_state:
-    st.session_state.monthly_spending = {"Groceries": 0, "Household": 0}
+    st.session_state.monthly_spending = {"Groceries": 0}  # Only tracking Groceries now
 if "order_placed" not in st.session_state:
     st.session_state.order_placed = False
 if "order_details" not in st.session_state:
@@ -241,55 +232,52 @@ if "transaction_history" not in st.session_state:
     st.session_state.transaction_history = []
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Shop"
+if "voice_text" not in st.session_state:
+    st.session_state.voice_text = ""
 
-# Function to create budget allocation pie chart
-def create_budget_allocation_chart():
-    # Get actual budget values
-    grocery_budget = st.session_state.get("grocery_budget", 5000)
-    household_budget = st.session_state.get("household_budget", 2000)
-    total_budget = grocery_budget + household_budget
+# Function to display an advertisement
+def display_ad():
+    # This is a dummy ad function - in a real app, you'd integrate with an ad network
+    ad_types = [
+        {
+            "title": "Save 20% on Groceries",
+            "description": "Use code SIORA20 for 20% off your first order at BigBasket",
+            "color": "#e3f2fd",
+            "text_color": "#1565c0",
+            "company": "BigBasket"
+        },
+        {
+            "title": "Free Delivery on Swiggy",
+            "description": "Order above ₹199 and get free delivery on your first 3 orders",
+            "color": "#fff3e0",
+            "text_color": "#e65100",
+            "company": "Swiggy"
+        },
+        {
+            "title": "Flash Sale on Electronics",
+            "description": "50% off on selected electronics this weekend only",
+            "color": "#e8f5e9",
+            "text_color": "#2e7d32",
+            "company": "Flipkart"
+        }
+    ]
     
-    # Calculate actual percentages
-    grocery_percent = (grocery_budget / total_budget * 100) if total_budget > 0 else 0
-    household_percent = (household_budget / total_budget * 100) if total_budget > 0 else 0
+    ad = random.choice(ad_types)
     
-    # Create data for the pie chart
-    budget_data = {
-        'Category': ['Groceries', 'Household'],
-        'Budget': [grocery_budget, household_budget],
-        'Percentage': [f"{grocery_percent:.1f}%", f"{household_percent:.1f}%"]
-    }
-    
-    df = pd.DataFrame(budget_data)
-    
-    # Create a pie chart with colorful theme
-    fig = px.pie(
-        df, 
-        values='Budget', 
-        names='Category', 
-        title='Budget Allocation',
-        color_discrete_sequence=['#2962FF', '#FF6D00'],
-        hole=0.4
-    )
-    
-    # Update to show actual percentages
-    fig.update_traces(
-        textposition='inside', 
-        textinfo='percent+label',
-        marker=dict(line=dict(color='#FFFFFF', width=2)),
-        texttemplate='%{percent:.1f}% %{label}'
-    )
-    
-    fig.update_layout(
-        font_family="Arial",
-        title_font_size=20,
-        title_font_color="#333333",
-        legend_title_font_color="#333333"
-    )
-    
-    return fig
+    st.markdown(f"""
+    <div class="ad-container" style="background-color: {ad['color']}; border-left: 5px solid {ad['text_color']}">
+        <div class="ad-label">Advertisement</div>
+        <div class="ad-content">
+            <div>
+                <h4 style="color: {ad['text_color']}; margin: 0;">{ad['title']}</h4>
+                <p style="margin: 5px 0">{ad['description']}</p>
+                <p style="font-size: 11px; margin: 0;">Sponsored by {ad['company']}</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Function to create spent vs remaining pie chart for groceries only
+# Function to create grocery spending pie chart
 def create_grocery_spending_chart():
     # Get current month for the title
     current_month = datetime.datetime.now().strftime("%B")
@@ -344,7 +332,7 @@ with col2:
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
         <img src="data:image/png;base64,{logo_img}" style="height: 80px;">
         <div style="margin-left: 20px;">
-            <h1 style="margin: 0; color: #2962FF;">Your Shopping Buddy</h1>
+            <h1 style="margin: 0; color: #2962FF;">Shopping Optimization Agent</h1>
             <p style="margin: 0; color: #666;">Compare prices, track budgets, shop smarter</p>
         </div>
     </div>
@@ -460,15 +448,65 @@ with tab1:
         </div>
         """, unsafe_allow_html=True)
         
-        new_item = st.text_input("", placeholder="e.g., milk, bread, eggs", label_visibility="collapsed")
-
-        col1, col2 = st.columns([4, 1])
+        # Display ad at the top of the shopping interface
+        display_ad()
+        
+        # Text input with voice button
+        col1, col2, col3 = st.columns([4, 0.5, 1])
+        
+        with col1:
+            new_item = st.text_input("", value=st.session_state.voice_text, 
+                                     placeholder="e.g., milk, bread, eggs", 
+                                     label_visibility="collapsed")
+        
         with col2:
+            # Voice button styling
+            st.markdown("""
+            <style>
+            .voice-btn {
+                background-color: #FF6D00;
+                color: white;
+                border-radius: 50%;
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                margin: 0 auto;
+            }
+            .voice-btn:hover {
+                background-color: #FF9E40;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+            # Voice input button
+            if st.button("🎤", help="Click to speak your shopping list", key="voice_button"):
+                # Simulate voice recording and processing
+                with st.spinner("Listening..."):
+                    # Simulate processing time
+                    time.sleep(1.5)
+                    # Get simulated transcription
+                    transcribed_text = simulate_voice_transcription()
+                    
+                    if transcribed_text:
+                        st.session_state.voice_text = transcribed_text
+                        st.success(f"Heard: {transcribed_text}")
+                        # Add a note about Hindi translation for the demo
+                        st.info("Hindi voice input would be translated to English text")
+                        st.rerun()
+        
+        with col3:
             if st.button("Compare Prices", type="primary"):
                 if new_item:
                     # Parse items from input
                     items = [item.strip() for item in new_item.split(",") if item.strip()]
                     st.session_state.shopping_list = items
+                    st.session_state.voice_text = ""  # Clear voice text after submission
                     
                     # Show loading indicator
                     with st.spinner("Finding the best deals for you..."):
@@ -514,6 +552,10 @@ with tab1:
                             results[item] = item_results
                         
                         st.session_state.comparison_results = results
+
+        # Display another ad in the middle
+        if not st.session_state.comparison_results and not st.session_state.order_placed:
+            display_ad()
 
         # Display comparison results
         if st.session_state.comparison_results:
@@ -612,36 +654,9 @@ with tab1:
                         # Buy button for each marketplace
                         if st.button(f"Buy from {marketplace.capitalize()}", key=f"buy_{marketplace}", 
                                     type="primary" if is_best else "secondary"):
-                            # Process the purchase
-                            
-                            # Update monthly spending
-                            # Determine if this is primarily groceries or household items
-                            grocery_items = ["milk", "bread", "eggs", "rice", "flour", "vegetables", "fruits"]
-                            household_items = ["soap", "detergent", "tissues", "cleaner"]
-                            
-                            # Calculate how much of the total is groceries vs household items
+                            # Update monthly spending - ALL GOES TO GROCERIES NOW
                             total_spent = totals["grand_total"]
-                            grocery_count = sum(1 for item in st.session_state.shopping_list if any(g in item.lower() for g in grocery_items))
-                            household_count = sum(1 for item in st.session_state.shopping_list if any(h in item.lower() for h in household_items))
-                            other_count = len(st.session_state.shopping_list) - grocery_count - household_count
-                            
-                            # Distribute cost proportionally
-                            if grocery_count + household_count > 0:
-                                total_items = grocery_count + household_count + other_count
-                                grocery_ratio = grocery_count / total_items if total_items > 0 else 0
-                                household_ratio = household_count / total_items if total_items > 0 else 0
-                                
-                                # Default distribution if we can't categorize
-                                if grocery_ratio + household_ratio == 0:
-                                    grocery_ratio = 0.7  # Assume 70% groceries by default
-                                    household_ratio = 0.3  # and 30% household items
-                                
-                                # Update spending in session state
-                                st.session_state.monthly_spending["Groceries"] += total_spent * grocery_ratio
-                                st.session_state.monthly_spending["Household"] += total_spent * household_ratio
-                            else:
-                                # If no categorization, put all in groceries by default
-                                st.session_state.monthly_spending["Groceries"] += total_spent
+                            st.session_state.monthly_spending["Groceries"] += total_spent
                             
                             # Store order details to display on confirmation page
                             st.session_state.order_details = {
@@ -661,6 +676,9 @@ with tab1:
                             # Rerun to show confirmation screen
                             st.rerun()
                 
+                # Display another ad before purchase button
+                display_ad()
+                
                 # Buy button for best marketplace (outside the expanders)
                 st.markdown("""
                 <div class="highlight-card">
@@ -670,36 +688,9 @@ with tab1:
                 """, unsafe_allow_html=True)
                 
                 if st.button(f"Buy from {best_marketplace.capitalize()} (BEST DEAL)", type="primary"):
-                    # Process the purchase
-                    
-                    # Update monthly spending
-                    # Determine if this is primarily groceries or household items
-                    grocery_items = ["milk", "bread", "eggs", "rice", "flour", "vegetables", "fruits"]
-                    household_items = ["soap", "detergent", "tissues", "cleaner"]
-                    
-                    # Calculate how much of the total is groceries vs household items
+                    # Update monthly spending - ALL GOES TO GROCERIES NOW
                     total_spent = marketplace_totals[best_marketplace]["grand_total"]
-                    grocery_count = sum(1 for item in st.session_state.shopping_list if any(g in item.lower() for g in grocery_items))
-                    household_count = sum(1 for item in st.session_state.shopping_list if any(h in item.lower() for h in household_items))
-                    other_count = len(st.session_state.shopping_list) - grocery_count - household_count
-                    
-                    # Distribute cost proportionally
-                    if grocery_count + household_count > 0:
-                        total_items = grocery_count + household_count + other_count
-                        grocery_ratio = grocery_count / total_items if total_items > 0 else 0
-                        household_ratio = household_count / total_items if total_items > 0 else 0
-                        
-                        # Default distribution if we can't categorize
-                        if grocery_ratio + household_ratio == 0:
-                            grocery_ratio = 0.7  # Assume 70% groceries by default
-                            household_ratio = 0.3  # and 30% household items
-                        
-                        # Update spending in session state
-                        st.session_state.monthly_spending["Groceries"] += total_spent * grocery_ratio
-                        st.session_state.monthly_spending["Household"] += total_spent * household_ratio
-                    else:
-                        # If no categorization, put all in groceries by default
-                        st.session_state.monthly_spending["Groceries"] += total_spent
+                    st.session_state.monthly_spending["Groceries"] += total_spent
                     
                     # Store order details to display on confirmation page
                     st.session_state.order_details = {
@@ -749,6 +740,9 @@ with tab1:
                     st.session_state.shopping_list = ["Vegetables", "Fruits"]
                     st.rerun()
 
+            # Display ad at the bottom
+            display_ad()
+
 # Tab 2: Budget Management
 with tab2:
     st.markdown("""
@@ -769,12 +763,11 @@ with tab2:
         
         # Store these values in session state so they persist
         st.session_state.grocery_budget = st.number_input("Grocery Budget (₹)", value=st.session_state.get("grocery_budget", 5000), min_value=0)
-        st.session_state.household_budget = st.number_input("Household Budget (₹)", value=st.session_state.get("household_budget", 2000), min_value=0)
         
         # Add a reset budget button
         if st.button("Reset Monthly Spending"):
             # Reset only the spending, not the budgets
-            st.session_state.monthly_spending = {"Groceries": 0, "Household": 0}
+            st.session_state.monthly_spending = {"Groceries": 0}
             st.success("Monthly spending has been reset!")
             st.rerun()
     
@@ -785,14 +778,9 @@ with tab2:
         </div>
         """, unsafe_allow_html=True)
         
-        # Show budget allocation pie chart
-        if st.session_state.grocery_budget > 0 or st.session_state.household_budget > 0:
-            allocation_fig = create_budget_allocation_chart()
-            st.plotly_chart(allocation_fig, use_container_width=True, key="budget_allocation_chart")
-            
-            # Show grocery spending pie chart
-            spending_fig = create_grocery_spending_chart()
-            st.plotly_chart(spending_fig, use_container_width=True, key="budget_spending_chart")
+        # Show grocery spending pie chart
+        spending_fig = create_grocery_spending_chart()
+        st.plotly_chart(spending_fig, use_container_width=True, key="budget_spending_chart")
     
     # Monthly spending summary
     st.markdown("""
@@ -802,37 +790,18 @@ with tab2:
     """, unsafe_allow_html=True)
     
     grocery_spent = st.session_state.monthly_spending.get("Groceries", 0)
-    household_spent = st.session_state.monthly_spending.get("Household", 0)
-    total_spent = grocery_spent + household_spent
+    total_spent = grocery_spent  # Total is just grocery spent now
     
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown(f"""
-        <div class="card" style="text-align: center; background-color: #E3F2FD; height: 100%;">
-            <h3 style="margin-top: 0; color: #2962FF;">Grocery Spending</h3>
-            <p style="font-size: 2rem; font-weight: bold; color: #2962FF;">₹{grocery_spent:.2f}</p>
-            <p>of ₹{st.session_state.grocery_budget:.2f} budget</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(f"""
-        <div class="card" style="text-align: center; background-color: #FFF3E0; height: 100%;">
-            <h3 style="margin-top: 0; color: #FF6D00;">Household Spending</h3>
-            <p style="font-size: 2rem; font-weight: bold; color: #FF6D00;">₹{household_spent:.2f}</p>
-            <p>of ₹{st.session_state.household_budget:.2f} budget</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown(f"""
-        <div class="card" style="text-align: center; background-color: #E8F5E9; height: 100%;">
-            <h3 style="margin-top: 0; color: #4CAF50;">Total Spending</h3>
-            <p style="font-size: 2rem; font-weight: bold; color: #4CAF50;">₹{total_spent:.2f}</p>
-            <p>of ₹{st.session_state.grocery_budget + st.session_state.household_budget:.2f} total budget</p>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="card" style="text-align: center; background-color: #E3F2FD; height: 100%;">
+        <h3 style="margin-top: 0; color: #2962FF;">Grocery Spending</h3>
+        <p style="font-size: 2.5rem; font-weight: bold; color: #2962FF;">₹{grocery_spent:.2f}</p>
+        <p>of ₹{st.session_state.grocery_budget:.2f} budget</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Display ad in budget tab
+    display_ad()
 
 # Tab 3: Transaction History
 with tab3:
@@ -842,6 +811,9 @@ with tab3:
         <p>View all your past purchases and track your spending</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Display ad in transaction history tab
+    display_ad()
     
     if st.session_state.transaction_history:
         # Display all transactions in a table
@@ -881,7 +853,7 @@ with tab3:
         total_spent = sum(transaction['amount'] for transaction in st.session_state.transaction_history)
         avg_transaction = total_spent / len(st.session_state.transaction_history) if st.session_state.transaction_history else 0
         
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
             st.markdown(f"""
             <div class="card" style="text-align: center; background-color: #E3F2FD;">
@@ -895,16 +867,12 @@ with tab3:
             <div class="card" style="text-align: center; background-color: #FFF3E0;">
                 <h3 style="margin-top: 0; color: #FF6D00;">Total Spent</h3>
                 <p style="font-size: 2.5rem; font-weight: bold; color: #FF6D00;">₹{total_spent:.2f}</p>
+                <p>Average: ₹{avg_transaction:.2f} per transaction</p>
             </div>
             """, unsafe_allow_html=True)
         
-        with col3:
-            st.markdown(f"""
-            <div class="card" style="text-align: center; background-color: #E8F5E9;">
-                <h3 style="margin-top: 0; color: #4CAF50;">Average Transaction</h3>
-                <p style="font-size: 2.5rem; font-weight: bold; color: #4CAF50;">₹{avg_transaction:.2f}</p>
-            </div>
-            """, unsafe_allow_html=True)
+        # Display ad at the bottom
+        display_ad()
     else:
         st.markdown("""
         <div class="card" style="text-align: center; padding: 40px;">
@@ -913,3 +881,6 @@ with tab3:
             <p>Go to the Shop tab to start shopping!</p>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Display ad when no transactions
+        display_ad()
