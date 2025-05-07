@@ -9,7 +9,7 @@ from io import BytesIO
 from PIL import Image, ImageDraw
 
 # App configuration
-st.set_page_config(page_title="Siora - Shopping Assistant", page_icon="🛒", layout="wide")
+st.set_page_config(page_title="Siora - Your Shopping Buddy", page_icon="🛒", layout="wide")
 
 # Function to simulate Vaani Hindi to English translation
 def simulate_vaani_translation():
