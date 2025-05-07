@@ -14,76 +14,88 @@ st.set_page_config(page_title="Siora - Shopping Assistant", page_icon="🛒", la
 # Create Siora logo
 def create_logo():
     buffered = BytesIO()
-    width, height = 400, 120
-    
-    # Create a new image with dark background
-    img = Image.new('RGB', (width, height), color=(10, 15, 30))
+    width, height = 300, 100
+    img = Image.new('RGB', (width, height), color=0)
     d = ImageDraw.Draw(img)
-    
-    # Draw a horizontal blue accent line at the bottom
-    accent_y = height - 20
-    for x in range(width):
-        # Gradient blue line
-        blue_intensity = 100 + int(100 * (x / width))
-        d.point((x, accent_y), fill=(0, blue_intensity, 255))
-    
-    # Draw main text "SIORA"
+
+    # Gradient background
+    #for y in range(height):
+       # r = int(30 + (70 - 30) * (y / height))
+       # g = int(136 + (190 - 136) * (y / height))
+       # b = int(229 + (255 - 229) * (y / height))
+       # d.line([(0, y), (width, y)], fill=(r, g, b))
+
+    # Try loading a bold font
+    try:
+        font_main = ImageFont.truetype("arialbd.ttf", 56)
+    except:
+        font_main = ImageFont.load_default()
+
+    # Get text size using getbbox
     text = "SIORA"
-    font = ImageFont.load_default()
-    
-    # Make the text as large as possible
-    # Center the text
-    x = width // 2 - 60  # Estimated center for "SIORA" with default font
-    y = height // 2 - 20
-    
-    # Draw text with a subtle glow effect
-    # Glow
-    for dx in [-2, -1, 1, 2]:
-        for dy in [-2, -1, 1, 2]:
-            d.text((x+dx, y+dy), text, font=font, fill=(0, 80, 160))
-    
-    # Main text (bright)
-    d.text((x, y), text, font=font, fill=(255, 255, 255))
-    
-    # Add big letter spacing to make it more visually appealing
-    # Draw individual letters with spacing
-    spacing = 20
-    letters = list(text)
-    letter_x = width // 2 - (len(letters) * spacing) // 2
-    for letter in letters:
-        # Draw each letter with glow
-        for dx in [-1, 0, 1]:
-            for dy in [-1, 0, 1]:
-                if dx != 0 or dy != 0:  # Skip the center position (will be drawn later)
-                    d.text((letter_x+dx, y+dy), letter, font=font, fill=(0, 100, 200))
-        
-        # Draw the letter in white
-        d.text((letter_x, y), letter, font=font, fill=(255, 255, 255))
-        letter_x += spacing
-    
-    # Add a tagline
-    tagline = "AI Shopping Assistant"
-    tagline_x = width // 2 - len(tagline) * 3  # Rough center estimation
-    tagline_y = y + 25
-    d.text((tagline_x, tagline_y), tagline, font=font, fill=(200, 200, 255))
-    
+    bbox = font_main.getbbox(text)
+    text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    x = (width - text_width) // 2
+    y = (height - text_height) // 2
+
+    # Draw main text (simple white)
+    d.text((x, y), text, font=font_main, fill=(255, 255, 255))
+
     # Convert to base64
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
-# Function to simulate voice transcription - for demo purposes
-def simulate_voice_transcription():
+# Function to simulate voice input (for demo purposes)
+def simulate_voice_input():
     """Simulate voice transcription for demonstration purposes"""
-    # Predefined responses that would normally come from a voice API
-    example_translations = [
+    options = [
         "milk, bread, eggs",
         "rice, dal, flour, oil",
         "vegetables, fruits, spices",
         "soap, detergent, toothpaste"
     ]
+    return random.choice(options)
+
+# Function to display an advertisement
+def display_ad():
+    ad_types = [
+        {
+            "title": "Save 20% on Groceries",
+            "description": "Use code SIORA20 for 20% off your first order at BigBasket",
+            "color": "#e3f2fd",
+            "text_color": "#1565c0",
+            "company": "BigBasket"
+        },
+        {
+            "title": "Free Delivery on Swiggy",
+            "description": "Order above ₹199 and get free delivery on your first 3 orders",
+            "color": "#fff3e0",
+            "text_color": "#e65100",
+            "company": "Swiggy"
+        },
+        {
+            "title": "Flash Sale on Electronics",
+            "description": "50% off on selected electronics this weekend only",
+            "color": "#e8f5e9",
+            "text_color": "#2e7d32",
+            "company": "Flipkart"
+        }
+    ]
     
-    # For the demo, randomly select from predefined responses
-    return random.choice(example_translations)
+    ad = random.choice(ad_types)
+    
+    st.markdown(f"""
+    <div style="background-color: {ad['color']}; border-radius: 8px; padding: 15px; margin: 10px 0; border: 1px solid #E4E6E8; border-left: 5px solid {ad['text_color']}; text-align: center;">
+        <div style="font-size: 10px; text-transform: uppercase; color: #666; margin-bottom: 5px;">Advertisement</div>
+        <div style="display: flex; align-items: center; justify-content: center;">
+            <div>
+                <h4 style="color: {ad['text_color']}; margin: 0;">{ad['title']}</h4>
+                <p style="margin: 5px 0">{ad['description']}</p>
+                <p style="font-size: 11px; margin: 0;">Sponsored by {ad['company']}</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Custom CSS for colorful design
 def apply_custom_css():
@@ -169,47 +181,24 @@ def apply_custom_css():
     }
     
     /* Voice button styling */
-    .voice-btn {
+    .voice-button {
         background-color: #FF6D00;
         color: white;
+        border: none;
         border-radius: 50%;
         width: 36px;
         height: 36px;
-        font-size: 18px;
-        border: none;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
+        margin: 0;
+        padding: 0;
         cursor: pointer;
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        margin: 0 auto;
     }
     
-    .voice-btn:hover {
+    .voice-button:hover {
         background-color: #FF9E40;
-    }
-    
-    /* Ad space styling */
-    .ad-container {
-        background-color: #F0F2F5;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        border: 1px solid #E4E6E8;
-        text-align: center;
-    }
-    
-    .ad-label {
-        font-size: 10px;
-        text-transform: uppercase;
-        color: #666;
-        margin-bottom: 5px;
-    }
-    
-    .ad-content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -223,7 +212,7 @@ if "shopping_list" not in st.session_state:
 if "comparison_results" not in st.session_state:
     st.session_state.comparison_results = None
 if "monthly_spending" not in st.session_state:
-    st.session_state.monthly_spending = {"Groceries": 0}  # Only tracking Groceries now
+    st.session_state.monthly_spending = {"Groceries": 0}  # Only Groceries category now
 if "order_placed" not in st.session_state:
     st.session_state.order_placed = False
 if "order_details" not in st.session_state:
@@ -234,48 +223,6 @@ if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Shop"
 if "voice_text" not in st.session_state:
     st.session_state.voice_text = ""
-
-# Function to display an advertisement
-def display_ad():
-    # This is a dummy ad function - in a real app, you'd integrate with an ad network
-    ad_types = [
-        {
-            "title": "Save 20% on Groceries",
-            "description": "Use code SIORA20 for 20% off your first order at BigBasket",
-            "color": "#e3f2fd",
-            "text_color": "#1565c0",
-            "company": "BigBasket"
-        },
-        {
-            "title": "Free Delivery on Swiggy",
-            "description": "Order above ₹199 and get free delivery on your first 3 orders",
-            "color": "#fff3e0",
-            "text_color": "#e65100",
-            "company": "Swiggy"
-        },
-        {
-            "title": "Flash Sale on Electronics",
-            "description": "50% off on selected electronics this weekend only",
-            "color": "#e8f5e9",
-            "text_color": "#2e7d32",
-            "company": "Flipkart"
-        }
-    ]
-    
-    ad = random.choice(ad_types)
-    
-    st.markdown(f"""
-    <div class="ad-container" style="background-color: {ad['color']}; border-left: 5px solid {ad['text_color']}">
-        <div class="ad-label">Advertisement</div>
-        <div class="ad-content">
-            <div>
-                <h4 style="color: {ad['text_color']}; margin: 0;">{ad['title']}</h4>
-                <p style="margin: 5px 0">{ad['description']}</p>
-                <p style="font-size: 11px; margin: 0;">Sponsored by {ad['company']}</p>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
 # Function to create grocery spending pie chart
 def create_grocery_spending_chart():
@@ -460,45 +407,15 @@ with tab1:
                                      label_visibility="collapsed")
         
         with col2:
-            # Voice button styling
-            st.markdown("""
-            <style>
-            .voice-btn {
-                background-color: #FF6D00;
-                color: white;
-                border-radius: 50%;
-                width: 36px;
-                height: 36px;
-                font-size: 18px;
-                border: none;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                margin: 0 auto;
-            }
-            .voice-btn:hover {
-                background-color: #FF9E40;
-            }
-            </style>
-            """, unsafe_allow_html=True)
-            
             # Voice input button
-            if st.button("🎤", help="Click to speak your shopping list", key="voice_button"):
-                # Simulate voice recording and processing
+            if st.button("🎤", help="Click to speak your shopping list"):
                 with st.spinner("Listening..."):
-                    # Simulate processing time
-                    time.sleep(1.5)
-                    # Get simulated transcription
-                    transcribed_text = simulate_voice_transcription()
-                    
-                    if transcribed_text:
-                        st.session_state.voice_text = transcribed_text
-                        st.success(f"Heard: {transcribed_text}")
-                        # Add a note about Hindi translation for the demo
-                        st.info("Hindi voice input would be translated to English text")
-                        st.rerun()
+                    time.sleep(1.5)  # Simulate listening time
+                    voice_text = simulate_voice_input()
+                    st.session_state.voice_text = voice_text
+                    st.success(f"Heard: {voice_text}")
+                    st.info("Hindi voice input would be translated to English text")
+                    st.rerun()
         
         with col3:
             if st.button("Compare Prices", type="primary"):
@@ -553,10 +470,6 @@ with tab1:
                         
                         st.session_state.comparison_results = results
 
-        # Display another ad in the middle
-        if not st.session_state.comparison_results and not st.session_state.order_placed:
-            display_ad()
-
         # Display comparison results
         if st.session_state.comparison_results:
             st.markdown("""
@@ -565,6 +478,9 @@ with tab1:
                 <p>Compare prices across marketplaces and find the best deals</p>
             </div>
             """, unsafe_allow_html=True)
+            
+            # Display another ad
+            display_ad()
             
             results = st.session_state.comparison_results
             marketplaces = ["zepto", "swiggy", "blinkit", "bigbasket"]
@@ -656,6 +572,7 @@ with tab1:
                                     type="primary" if is_best else "secondary"):
                             # Update monthly spending - ALL GOES TO GROCERIES NOW
                             total_spent = totals["grand_total"]
+                            # CHANGE: All spending goes to Groceries category
                             st.session_state.monthly_spending["Groceries"] += total_spent
                             
                             # Store order details to display on confirmation page
@@ -690,6 +607,7 @@ with tab1:
                 if st.button(f"Buy from {best_marketplace.capitalize()} (BEST DEAL)", type="primary"):
                     # Update monthly spending - ALL GOES TO GROCERIES NOW
                     total_spent = marketplace_totals[best_marketplace]["grand_total"]
+                    # CHANGE: All spending goes to Groceries category
                     st.session_state.monthly_spending["Groceries"] += total_spent
                     
                     # Store order details to display on confirmation page
@@ -739,7 +657,7 @@ with tab1:
                 if st.button("Vegetables, Fruits", key="example3"):
                     st.session_state.shopping_list = ["Vegetables", "Fruits"]
                     st.rerun()
-
+            
             # Display ad at the bottom
             display_ad()
 
@@ -751,6 +669,9 @@ with tab2:
         <p>Track your spending and manage your monthly budget</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Display ad in budget tab
+    display_ad()
     
     col1, col2 = st.columns(2)
     
@@ -789,8 +710,8 @@ with tab2:
     </div>
     """, unsafe_allow_html=True)
     
+    # CHANGE: Only show grocery spending
     grocery_spent = st.session_state.monthly_spending.get("Groceries", 0)
-    total_spent = grocery_spent  # Total is just grocery spent now
     
     st.markdown(f"""
     <div class="card" style="text-align: center; background-color: #E3F2FD; height: 100%;">
@@ -799,9 +720,6 @@ with tab2:
         <p>of ₹{st.session_state.grocery_budget:.2f} budget</p>
     </div>
     """, unsafe_allow_html=True)
-
-    # Display ad in budget tab
-    display_ad()
 
 # Tab 3: Transaction History
 with tab3:
@@ -871,7 +789,7 @@ with tab3:
             </div>
             """, unsafe_allow_html=True)
         
-        # Display ad at the bottom
+        # Display ad at the bottom of transaction history
         display_ad()
     else:
         st.markdown("""
