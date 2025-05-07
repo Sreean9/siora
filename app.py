@@ -284,7 +284,7 @@ st.markdown("""
         <h1 style="font-size: 2.25rem; margin: 0; font-weight: bold;">SIORA</h1>
     </div>
     <div style="padding: 20px 30px; flex: 1;">
-        <h1 style="color: #2962FF; margin: 0 0 5px 0; font-size: 2.4rem;">Shopping Optimization Agent</h1>
+        <h1 style="color: #2962FF; margin: 0 0 5px 0; font-size: 2.4rem;">Your Shopping Buddy</h1>
         <p style="color: #555; margin: 0; font-size: 1.1rem;">Compare prices, track budgets, shop smarter</p>
     </div>
 </div>
