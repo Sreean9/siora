@@ -281,7 +281,7 @@ def create_grocery_spending_chart():
 st.markdown("""
 <div style="display: flex; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
     <div style="background: linear-gradient(135deg, #2962FF, #1565C0); padding: 25px; color: white; text-align: center; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
-        <h1 style="font-size: 2rem; margin: 0; font-weight: bold;">SIORA</h1>
+        <h1 style="font-size: 2.4rem; margin: 0; font-weight: bold;">SIORA</h1>
     </div>
     <div style="padding: 20px 30px; flex: 1;">
         <h1 style="color: #2962FF; margin: 0 0 5px 0; font-size: 2.4rem;">Shopping Optimization Agent</h1>
