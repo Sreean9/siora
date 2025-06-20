@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 import warnings
 import sys
 import subprocess
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 warnings.filterwarnings("ignore")
 
