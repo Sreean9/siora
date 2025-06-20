@@ -331,8 +331,7 @@ class RealVaaniSpeechProcessor:
             }
 class RealSerpAPIConnector:
     """Production SERP API with advanced error handling"""
-    
-    def __init__(self):
+def __init__(self):
         self.serpapi_key = get_secret('SERPAPI_KEY')
         self.api_mode = get_secret('API_MODE', 'production')
         
