@@ -692,8 +692,7 @@ def calculate_nutrition_balance(self, categories: Dict) -> int:
                 score -= min(penalty, 20)  # Max 20 point penalty
         
         return max(0, min(100, score))
-    
-    def get_seasonal_insight(self, categories: Dict) -> Optional[str]:
+def get_seasonal_insight(self, categories: Dict) -> Optional[str]:
         """Generate seasonal insights"""
         current_month = datetime.datetime.now().month
         
@@ -719,8 +718,7 @@ def calculate_nutrition_balance(self, categories: Dict) -> int:
                 return "☀️ AI suggests adding cooling fruits for summer hydration."
         
         return None
-    
-    def generate_ai_suggestions(self, shopping_list: List[str], categories: Dict) -> List[str]:
+def generate_ai_suggestions(self, shopping_list: List[str], categories: Dict) -> List[str]:
         """AI-powered smart suggestions"""
         suggestions = []
         
@@ -744,8 +742,7 @@ def calculate_nutrition_balance(self, categories: Dict) -> int:
             suggestions.append("💡 AI budget tip: Look for combo offers and bulk discounts.")
         
         return suggestions[:5]  # Limit to top 5
-    
-    def get_ai_complementary_suggestions(self, shopping_list: List[str], categories: Dict) -> List[str]:
+def get_ai_complementary_suggestions(self, shopping_list: List[str], categories: Dict) -> List[str]:
         """AI-powered complementary item suggestions"""
         suggestions = []
         
@@ -780,8 +777,7 @@ def calculate_nutrition_balance(self, categories: Dict) -> int:
                         break  # Only suggest one item per combo
         
         return suggestions
-    
-    def calculate_ai_health_score(self, categories: Dict) -> int:
+def calculate_ai_health_score(self, categories: Dict) -> int:
         """Enhanced AI health scoring"""
         base_score = self.calculate_nutrition_balance(categories)
         
@@ -793,8 +789,7 @@ def calculate_nutrition_balance(self, categories: Dict) -> int:
         final_score = base_score + variety_bonus + freshness_bonus - processing_penalty
         
         return max(0, min(100, final_score))
-    
-    def calculate_variety_bonus(self, categories: Dict) -> int:
+def calculate_variety_bonus(self, categories: Dict) -> int:
         """Calculate bonus for variety within categories"""
         bonus = 0
         
@@ -808,15 +803,13 @@ def calculate_nutrition_balance(self, categories: Dict) -> int:
             bonus += 3
         
         return bonus
-    
-    def calculate_freshness_bonus(self, categories: Dict) -> int:
+def calculate_freshness_bonus(self, categories: Dict) -> int:
         """Calculate bonus for fresh produce"""
         fresh_categories = ['Vegetables', 'Fruits', 'Dairy']
         fresh_count = sum(1 for cat in fresh_categories if cat in categories)
         
         return fresh_count * 3
-    
-    def calculate_processing_penalty(self, categories: Dict) -> int:
+def calculate_processing_penalty(self, categories: Dict) -> int:
         """Calculate penalty for processed foods"""
         processed_categories = ['Snacks']
         penalty = 0
@@ -826,8 +819,7 @@ def calculate_nutrition_balance(self, categories: Dict) -> int:
                 penalty += len(categories[cat]) * 3
         
         return min(penalty, 15)  # Max 15 point penalty
-    
-    def suggest_complementary_items(self, shopping_list: List[str]) -> List[str]:
+def suggest_complementary_items(self, shopping_list: List[str]) -> List[str]:
         """Suggest complementary items using AI logic"""
         complementary = []
         
@@ -858,8 +850,7 @@ def calculate_nutrition_balance(self, categories: Dict) -> int:
                         complementary.append(complement)
         
         return list(set(complementary))[:3]  # Return unique items, max 3
-    
-    def get_seasonal_recommendations(self) -> List[str]:
+def get_seasonal_recommendations(self) -> List[str]:
         """AI-powered seasonal recommendations"""
         current_month = datetime.datetime.now().month
         recommendations = []
@@ -912,13 +903,11 @@ with st.sidebar.expander("🔧 Configuration Status"):
 
 class RealSmartBudgetAI:
     """Real AI-powered budget analysis using advanced models"""
-    
-    def __init__(self):
+def __init__(self):
         self.serpapi_key = get_secret('SERPAPI_KEY')  # Using secure secret function
         self.hf_token = get_secret('HUGGINGFACE_TOKEN')  # Using secure secret function
         self.setup_budget_ai_models()
-    
-    def setup_budget_ai_models(self):
+def setup_budget_ai_models(self):
         """Setup real AI models for budget analysis"""
         try:
             if TRANSFORMERS_AVAILABLE and self.hf_token != 'demo_key':
@@ -937,8 +926,7 @@ class RealSmartBudgetAI:
         except Exception as e:
             st.warning(f"Budget AI setup issue: {e}")
             self.market_sentiment = None
-    
-    def analyze_real_spending_patterns(self, transaction_history: List[Dict]) -> Dict:
+def analyze_real_spending_patterns(self, transaction_history: List[Dict]) -> Dict:
         """Real AI analysis of spending patterns"""
         if not transaction_history:
             return {'insights': [], 'recommendations': [], 'trends': {}, 'alerts': [], 'ai_confidence': 0}
@@ -953,8 +941,7 @@ class RealSmartBudgetAI:
         combined_analysis = self.merge_analyses(market_analysis, local_analysis)
         
         return combined_analysis
-    
-    def get_real_market_trends(self, transaction_history: List[Dict]) -> Dict:
+def get_real_market_trends(self, transaction_history: List[Dict]) -> Dict:
         """Get real market trends using SERP API"""
         if not SERPAPI_AVAILABLE or not self.serpapi_key or self.serpapi_key == 'demo_key':
             return {'source': 'No Market Data', 'insights': [], 'recommendations': []}
@@ -998,8 +985,7 @@ class RealSmartBudgetAI:
         except Exception as e:
             st.warning(f"Market trend analysis failed: {e}")
             return {'source': 'Market Analysis Failed', 'insights': [], 'recommendations': []}
-    
-    def search_price_trends(self, item: str) -> Optional[Dict]:
+def search_price_trends(self, item: str) -> Optional[Dict]:
         """Search for price trends using SERP API"""
         try:
             search_params = {
@@ -1034,8 +1020,7 @@ class RealSmartBudgetAI:
             
         except Exception as e:
             return None
-    
-    def get_frequent_items(self, transaction_history: List[Dict]) -> List[str]:
+def get_frequent_items(self, transaction_history: List[Dict]) -> List[str]:
         """Get most frequently bought items"""
         item_counts = {}
         
@@ -1046,8 +1031,7 @@ class RealSmartBudgetAI:
         # Sort by frequency
         sorted_items = sorted(item_counts.items(), key=lambda x: x[1], reverse=True)
         return [item[0] for item in sorted_items]
-    
-    def advanced_local_analysis(self, transaction_history: List[Dict]) -> Dict:
+def advanced_local_analysis(self, transaction_history: List[Dict]) -> Dict:
         """Advanced local AI analysis using statistical methods"""
         df = pd.DataFrame(transaction_history)
         df['date'] = pd.to_datetime(df['date'])
@@ -1130,8 +1114,7 @@ class RealSmartBudgetAI:
                 'trend_direction': 'increasing' if recent_slope > 2 else 'decreasing' if recent_slope < -2 else 'stable'
             }
         }
-    
-    def calculate_trend_slope(self, values: np.ndarray) -> np.ndarray:
+def calculate_trend_slope(self, values: np.ndarray) -> np.ndarray:
         """Calculate trend slope for each point using linear regression"""
         slopes = []
         window_size = min(5, len(values))
@@ -1149,8 +1132,7 @@ class RealSmartBudgetAI:
                 slopes.append(0)
         
         return np.array(slopes)
-    
-    def merge_analyses(self, market_analysis: Dict, local_analysis: Dict) -> Dict:
+def merge_analyses(self, market_analysis: Dict, local_analysis: Dict) -> Dict:
         """Merge market and local analyses intelligently"""
         combined = {
             'insights': [],
@@ -1188,8 +1170,7 @@ class RealSmartBudgetAI:
             combined['insights'].append("📊 High-quality market data enhances analysis accuracy")
         
         return combined
-    
-    def predict_real_monthly_budget(self, transaction_history: List[Dict], current_spending: float) -> Dict:
+def predict_real_monthly_budget(self, transaction_history: List[Dict], current_spending: float) -> Dict:
         """Real AI-powered budget prediction with market awareness"""
         
         # Try market-aware prediction first
@@ -1199,8 +1180,7 @@ class RealSmartBudgetAI:
         
         # Fallback to advanced local prediction
         return self.advanced_local_prediction(transaction_history, current_spending)
-    
-    def get_market_aware_prediction(self, transaction_history: List[Dict], current_spending: float) -> Optional[Dict]:
+def get_market_aware_prediction(self, transaction_history: List[Dict], current_spending: float) -> Optional[Dict]:
         """Market-aware budget prediction using SERP API"""
         if not SERPAPI_AVAILABLE or not self.serpapi_key or self.serpapi_key == 'demo_key':
             return None
@@ -1251,8 +1231,7 @@ class RealSmartBudgetAI:
         except Exception as e:
             st.warning(f"Market-aware prediction failed: {e}")
             return None
-    
-    def advanced_local_prediction(self, transaction_history: List[Dict], current_spending: float) -> Dict:
+def advanced_local_prediction(self, transaction_history: List[Dict], current_spending: float) -> Dict:
         """Advanced local prediction using multiple AI techniques"""
         if len(transaction_history) < 3:
             return {
@@ -1323,8 +1302,7 @@ class RealSmartBudgetAI:
             'recommendation': f'Simple AI prediction: ₹{current_spending * 1.1:.0f} for next month',
             'source': 'Simple AI Fallback'
         }
-    
-    def linear_trend_prediction(self, df: pd.DataFrame, current_spending: float) -> Dict:
+def linear_trend_prediction(self, df: pd.DataFrame, current_spending: float) -> Dict:
         """Linear trend prediction method"""
         X = df['days_from_start'].values.reshape(-1, 1)
         y = df['amount'].values
@@ -1345,8 +1323,7 @@ class RealSmartBudgetAI:
             }
         
         return {'value': current_spending * 1.05, 'confidence': 0.3, 'trend_score': 0, 'method': 'Linear Fallback'}
-    
-    def moving_average_prediction(self, df: pd.DataFrame, current_spending: float) -> Dict:
+def moving_average_prediction(self, df: pd.DataFrame, current_spending: float) -> Dict:
         """Moving average based prediction"""
         window_size = min(5, len(df))
         recent_avg = df['amount'].rolling(window=window_size).mean().iloc[-1]
@@ -1364,8 +1341,7 @@ class RealSmartBudgetAI:
             'trend_score': trend_score,
             'method': 'Moving Average'
         }
-    
-    def seasonal_adjusted_prediction(self, df: pd.DataFrame, current_spending: float) -> Dict:
+def seasonal_adjusted_prediction(self, df: pd.DataFrame, current_spending: float) -> Dict:
         """Seasonal adjustment prediction"""
         df['month'] = df['date'].dt.month
         current_month = datetime.datetime.now().month
@@ -1390,8 +1366,7 @@ class RealSmartBudgetAI:
             'trend_score': trend_score,
             'method': 'Seasonal Adjustment'
         }
-    
-    def generate_real_savings_suggestions(self, price_comparison: Dict, transaction_history: List[Dict]) -> List[str]:
+def generate_real_savings_suggestions(self, price_comparison: Dict, transaction_history: List[Dict]) -> List[str]:
         """Generate AI-powered savings suggestions with real market data"""
         suggestions = []
         
@@ -1415,8 +1390,7 @@ class RealSmartBudgetAI:
         suggestions.extend(ai_suggestions)
         
         return suggestions[:8]  # Top 8 suggestions
-    
-    def get_market_savings_suggestions(self) -> List[str]:
+def get_market_savings_suggestions(self) -> List[str]:
         """Get savings suggestions from real market data"""
         suggestions = []
         
@@ -1450,8 +1424,7 @@ class RealSmartBudgetAI:
             pass  # Silent fail for market suggestions
         
         return suggestions
-    
-    def analyze_price_comparisons(self, price_comparison: Dict) -> List[str]:
+def analyze_price_comparisons(self, price_comparison: Dict) -> List[str]:
         """Analyze price comparison data for savings"""
         suggestions = []
         
@@ -1485,8 +1458,7 @@ class RealSmartBudgetAI:
             suggestions.append(f"🏆 {top_marketplace[0].title()} offers best deals for {top_marketplace[1]} items")
         
         return suggestions
-    
-    def analyze_spending_history(self, transaction_history: List[Dict]) -> List[str]:
+def analyze_spending_history(self, transaction_history: List[Dict]) -> List[str]:
         """Analyze spending history for patterns"""
         suggestions = []
         
@@ -1506,8 +1478,7 @@ class RealSmartBudgetAI:
                 suggestions.append("🛒 High shopping frequency detected - consider weekly bulk buying")
         
         return suggestions
-    
-    def generate_ai_generic_suggestions(self, transaction_history: List[Dict]) -> List[str]:
+def generate_ai_generic_suggestions(self, transaction_history: List[Dict]) -> List[str]:
         """Generate AI-powered generic savings suggestions"""
         suggestions = [
             "🕐 AI tip: Shop during off-peak hours for better deals",
