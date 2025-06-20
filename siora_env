@@ -1,0 +1,11 @@
+# Create virtual environment
+python -m venv siora_env
+
+# Activate it
+# On Windows:
+siora_env\Scripts\activate
+# On Mac/Linux:
+source siora_env/bin/activate
+
+# Upgrade pip
+python -m pip install --upgrade pip
