@@ -628,8 +628,7 @@ def simplify_category_name(self, ai_category: str) -> str:
             'Personal Care': 'Personal Care'
         }
         return mapping.get(ai_category, 'Other')
-    
-    def generate_ai_insights(self, categories: Dict, shopping_list: List[str]) -> List[str]:
+def generate_ai_insights(self, categories: Dict, shopping_list: List[str]) -> List[str]:
         """Generate AI-powered insights"""
         insights = []
         
