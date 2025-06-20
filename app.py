@@ -662,8 +662,7 @@ def generate_ai_insights(self, categories: Dict, shopping_list: List[str]) -> Li
             insights.append("🛒 Small list detected - AI suggests combining with other needs.")
         
         return insights
-    
-    def calculate_nutrition_balance(self, categories: Dict) -> int:
+def calculate_nutrition_balance(self, categories: Dict) -> int:
         """AI-powered nutrition scoring"""
         score = 0
         
