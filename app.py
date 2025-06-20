@@ -1505,7 +1505,7 @@ def load_real_ai_components():
     """Load all real AI components with secure secret management"""
     return {
         'speech_processor': RealVaaniSpeechProcessor(),
-        'marketplace_connector': RealSerpAPIConnector(),
+        'marketplace_connector': ProductionSerpAPIConnector(),
         'shopping_ai': AIShoppingIntelligence(),
         'budget_ai': RealSmartBudgetAI()
     }
