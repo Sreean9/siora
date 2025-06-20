@@ -613,8 +613,7 @@ def enhanced_rule_based_categorization(self, shopping_list: List[str], analysis:
             }
         
         return analysis
-    
-    def simplify_category_name(self, ai_category: str) -> str:
+def simplify_category_name(self, ai_category: str) -> str:
         """Convert AI category names to simplified versions"""
         mapping = {
             'Grocery Staples': 'Staples',
