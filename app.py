@@ -329,7 +329,7 @@ class RealVaaniSpeechProcessor:
                 'error': f'All speech recognition methods failed: {str(e)}',
                 'method': 'Complete Failure'
             }
-class ProductionSerpAPIConnector:
+class RealSerpAPIConnector:
     """Production SERP API with advanced error handling"""
     
     def __init__(self):
@@ -1505,7 +1505,7 @@ def load_real_ai_components():
     """Load all real AI components with secure secret management"""
     return {
         'speech_processor': RealVaaniSpeechProcessor(),
-        'marketplace_connector': ProductionSerpAPIConnector(),
+        'marketplace_connector': RealSerpAPIConnector(),
         'shopping_ai': AIShoppingIntelligence(),
         'budget_ai': RealSmartBudgetAI()
     }
