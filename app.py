@@ -563,8 +563,7 @@ class AIShoppingIntelligence:
         except Exception as e:
             st.warning(f"AI categorization failed: {e}. Using fallback.")
             return self.enhanced_rule_based_categorization(shopping_list, analysis)
-    
-  def enhanced_rule_based_categorization(self, shopping_list: List[str], analysis: Dict) -> Dict:
+def enhanced_rule_based_categorization(self, shopping_list: List[str], analysis: Dict) -> Dict:
         """Enhanced rule-based categorization"""
         categories = {
             'Staples': ['rice', 'wheat', 'flour', 'dal', 'oil', 'sugar', 'salt', 'bread'],
