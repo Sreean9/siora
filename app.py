@@ -1,3 +1,6 @@
+
+
+
 import streamlit as st
 import pandas as pd
 import random
@@ -11,10 +14,77 @@ import numpy as np
 import os
 from dotenv import load_dotenv
 import warnings
+import sys
+import subprocess
+
 warnings.filterwarnings("ignore")
 
-# Load environment variables for local development
+# Load environment variables
 load_dotenv()
+
+# Enhanced dependency checking and installation
+def check_and_install_dependencies():
+    """Check and install missing dependencies"""
+    required_packages = {
+        'serpapi': 'google-search-results',
+        'transformers': 'transformers',
+        'torch': 'torch',
+        'librosa': 'librosa',
+        'speech_recognition': 'SpeechRecognition',
+        'googletrans': 'googletrans==3.1.0a0'
+    }
+    
+    missing_packages = []
+    
+    for package, install_name in required_packages.items():
+        try:
+            __import__(package)
+        except ImportError:
+            missing_packages.append(install_name)
+    
+    if missing_packages:
+        st.warning(f"Installing missing packages: {', '.join(missing_packages)}")
+        for package in missing_packages:
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+                st.success(f"✅ Installed {package}")
+            except Exception as e:
+                st.error(f"❌ Failed to install {package}: {e}")
+
+# Run dependency check
+check_and_install_dependencies()
+
+# Now import with proper error handling
+try:
+    from serpapi import GoogleSearch
+    SERPAPI_AVAILABLE = True
+    st.success("✅ SERP API library loaded")
+except ImportError as e:
+    SERPAPI_AVAILABLE = False
+    st.error(f"❌ SERP API not available: {e}")
+
+try:
+    from transformers import pipeline, AutoTokenizer, AutoModelForSpeechSeq2Seq, AutoProcessor
+    import torch
+    import torchaudio
+    import librosa
+    import soundfile as sf
+    from datasets import load_dataset
+    import speech_recognition as sr
+    TRANSFORMERS_AVAILABLE = True
+    st.success("✅ AI/ML libraries loaded successfully")
+except ImportError as e:
+    TRANSFORMERS_AVAILABLE = False
+    st.error(f"❌ AI/ML libraries not available: {e}")
+
+try:
+    from googletrans import Translator
+    TRANSLATOR_AVAILABLE = True
+    st.success("✅ Translation service loaded")
+except ImportError as e:
+    TRANSLATOR_AVAILABLE = False
+    st.error(f"❌ Translation service not available: {e}")
+    
 
 # Secure secret management
 def get_secret(key: str, default: str = 'demo_key') -> str:
@@ -74,141 +144,122 @@ except ImportError:
     TRANSLATOR_AVAILABLE = False
 
 class RealVaaniSpeechProcessor:
-    """Real Vaani Speech Processing using Hugging Face models"""
+    """Production Vaani Speech Processing using real Hugging Face models"""
     
     def __init__(self):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.hf_token = get_secret('HUGGINGFACE_TOKEN')  # Using secure secret function
-        self.translator = Translator() if TRANSLATOR_AVAILABLE else None
-        self.setup_real_models()
-    
-    def setup_real_models(self):
-        """Initialize real Hugging Face models"""
         if not TRANSFORMERS_AVAILABLE:
-            st.error("❌ Transformers library not available")
+            st.error("❌ Cannot initialize speech processor - transformers not available")
             return
-        
-        try:
-            st.info("🤖 Loading real Vaani AI models...")
             
-            # Load Whisper for speech recognition (works well with Hindi)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.hf_token = get_secret('HUGGINGFACE_TOKEN')
+        self.translator = Translator() if TRANSLATOR_AVAILABLE else None
+        
+        st.info(f"🤖 Initializing AI models on {self.device}...")
+        self.setup_production_models()
+    
+    def setup_production_models(self):
+        """Initialize production AI models"""
+        try:
+            # Use a more reliable speech recognition model
             self.speech_recognizer = pipeline(
                 "automatic-speech-recognition",
-                model=get_secret('SPEECH_MODEL', 'openai/whisper-small'),  # Using secure secret
+                model="openai/whisper-small",
                 device=0 if torch.cuda.is_available() else -1,
-                use_auth_token=self.hf_token if self.hf_token != 'demo_key' else None
+                token=self.hf_token if self.hf_token != 'demo_key' else None
             )
             
-            # Load Hindi to English translation model
+            # Load Hindi-English translation
             self.translator_pipeline = pipeline(
                 "translation",
-                model=get_secret('TRANSLATION_MODEL', 'Helsinki-NLP/opus-mt-hi-en'),  # Using secure secret
+                model="Helsinki-NLP/opus-mt-hi-en",
                 device=0 if torch.cuda.is_available() else -1,
-                use_auth_token=self.hf_token if self.hf_token != 'demo_key' else None
+                token=self.hf_token if self.hf_token != 'demo_key' else None
             )
             
-            # Try to load Vaani dataset for reference
+            # Try to load Indic models for better Hindi support
             try:
-                if self.hf_token != 'demo_key':
-                    self.vaani_dataset = load_dataset(
-                        get_secret('VAANI_MODEL_NAME', 'ARTPARK-IISc/Vaani'), 
-                        split="train", 
-                        streaming=True, 
-                        use_auth_token=self.hf_token
-                    )
-                    st.success("✅ Vaani dataset loaded successfully!")
-                else:
-                    st.info("ℹ️ Vaani dataset skipped in demo mode")
-                    self.vaani_dataset = None
+                self.indic_processor = pipeline(
+                    "automatic-speech-recognition",
+                    model="ai4bharat/indic-wav2vec2-hindi-male",
+                    token=self.hf_token if self.hf_token != 'demo_key' else None
+                )
+                st.success("✅ Advanced Indic AI models loaded!")
             except Exception as e:
-                st.warning(f"⚠️ Vaani dataset not accessible: {e}")
-                self.vaani_dataset = None
+                st.warning(f"Indic models not available, using Whisper: {e}")
+                self.indic_processor = None
             
-            st.success("✅ Real AI models loaded successfully!")
+            st.success("✅ Production AI speech models loaded successfully!")
             
         except Exception as e:
-            st.error(f"❌ Error loading AI models: {e}")
+            st.error(f"❌ Failed to load AI models: {e}")
             self.speech_recognizer = None
             self.translator_pipeline = None
+            self.indic_processor = None
     
     def process_real_audio_with_vaani(self, audio_data):
-        """Process real audio using Vaani-inspired AI pipeline"""
+        """Process real audio using production AI pipeline"""
+        if not self.speech_recognizer:
+            return {'error': 'Speech recognition models not available'}
+        
         try:
-            if not TRANSFORMERS_AVAILABLE or self.speech_recognizer is None:
-                return self.fallback_speech_recognition(audio_data)
-            
-            # Convert audio to the format expected by Whisper
+            # Convert audio data
             if hasattr(audio_data, 'get_wav_data'):
-                # If it's from speech_recognition library
                 wav_data = audio_data.get_wav_data()
                 audio_array = np.frombuffer(wav_data, dtype=np.int16).astype(np.float32) / 32768.0
             else:
                 audio_array = audio_data
             
-            # Process with Whisper model
-            result = self.speech_recognizer(audio_array)
-            detected_text = result['text']
+            # Try Indic model first for better Hindi support
+            if self.indic_processor:
+                try:
+                    result = self.indic_processor(audio_array)
+                    detected_text = result['text']
+                    confidence = 0.9
+                    model_used = "Indic Wav2Vec2"
+                except Exception as e:
+                    st.warning(f"Indic model failed, falling back to Whisper: {e}")
+                    result = self.speech_recognizer(audio_array)
+                    detected_text = result['text']
+                    confidence = 0.85
+                    model_used = "OpenAI Whisper"
+            else:
+                result = self.speech_recognizer(audio_array)
+                detected_text = result['text']
+                confidence = 0.85
+                model_used = "OpenAI Whisper"
             
-            # Check if text is in Hindi and translate
+            # Translate if Hindi detected
             if self.contains_hindi(detected_text) and self.translator_pipeline:
-                translated = self.translator_pipeline(detected_text)
-                english_text = translated[0]['translation_text']
-                
-                return {
-                    'original_hindi': detected_text,
-                    'translated_english': english_text,
-                    'confidence': 0.9,
-                    'method': 'Real Vaani AI Pipeline',
-                    'model_used': f'{get_secret("SPEECH_MODEL")} + {get_secret("TRANSLATION_MODEL")}',
-                    'device': self.device
-                }
+                try:
+                    translated = self.translator_pipeline(detected_text)
+                    english_text = translated[0]['translation_text']
+                except Exception as e:
+                    st.warning(f"Translation failed: {e}")
+                    english_text = detected_text
             else:
-                return {
-                    'original_hindi': detected_text,
-                    'translated_english': detected_text,
-                    'confidence': 0.85,
-                    'method': 'Direct English Recognition',
-                    'model_used': get_secret('SPEECH_MODEL'),
-                    'device': self.device
-                }
-                
-        except Exception as e:
-            st.error(f"Real AI processing error: {e}")
-            return self.fallback_speech_recognition(audio_data)
-    
-    def contains_hindi(self, text):
-        """Check if text contains Hindi characters"""
-        hindi_range = range(0x0900, 0x097F)
-        return any(ord(char) in hindi_range for char in text)
-    
-    def fallback_speech_recognition(self, audio_data):
-        """Fallback method using Google Speech Recognition"""
-        try:
-            recognizer = sr.Recognizer()
-            
-            # Try Hindi recognition first
-            hindi_text = recognizer.recognize_google(audio_data, language='hi-IN')
-            
-            # Translate using googletrans
-            if self.translator:
-                english_text = self.translator.translate(hindi_text, src='hi', dest='en').text
-            else:
-                english_text = hindi_text
+                english_text = detected_text
             
             return {
-                'original_hindi': hindi_text,
+                'original_hindi': detected_text,
                 'translated_english': english_text,
-                'confidence': 0.7,
-                'method': 'Google Speech API Fallback'
+                'confidence': confidence,
+                'method': f'Production AI Pipeline ({model_used})',
+                'model_used': model_used,
+                'device': self.device,
+                'timestamp': datetime.datetime.now().isoformat()
             }
+            
         except Exception as e:
-            return {
-                'error': f'Could not process speech: {str(e)}',
-                'method': 'Failed'
-            }
+            st.error(f"AI processing error: {e}")
+            return self.fallback_speech_recognition(audio_data)
     
     def capture_real_audio(self, duration=5):
         """Capture real audio from microphone"""
+        if not sr:
+            st.error("Speech recognition library not available")
+            return None
+            
         try:
             recognizer = sr.Recognizer()
             with sr.Microphone() as source:
@@ -219,356 +270,172 @@ class RealVaaniSpeechProcessor:
         except Exception as e:
             st.error(f"Audio capture error: {str(e)}")
             return None
-
-class RealSerpAPIConnector:
-    """Real SERP API integration for live marketplace data"""
+    
+    def contains_hindi(self, text):
+        """Enhanced Hindi detection"""
+        hindi_ranges = [
+            (0x0900, 0x097F),  # Devanagari
+            (0x1CD0, 0x1CFF),  # Vedic Extensions
+            (0xA8E0, 0xA8FF),  # Devanagari Extended
+        ]
+        
+        for char in text:
+            char_code = ord(char)
+            for start, end in hindi_ranges:
+                if start <= char_code <= end:
+                    return True
+        return False
+    
+    def fallback_speech_recognition(self, audio_data):
+        """Enhanced fallback using Google Speech API"""
+        if not sr:
+            return {'error': 'No speech recognition available'}
+            
+        try:
+            recognizer = sr.Recognizer()
+            
+            # Try Hindi first
+            try:
+                hindi_text = recognizer.recognize_google(audio_data, language='hi-IN')
+                
+                # Translate using googletrans
+                if self.translator:
+                    english_text = self.translator.translate(hindi_text, src='hi', dest='en').text
+                else:
+                    english_text = hindi_text
+                
+                return {
+                    'original_hindi': hindi_text,
+                    'translated_english': english_text,
+                    'confidence': 0.75,
+                    'method': 'Google Speech API (Hindi)',
+                    'timestamp': datetime.datetime.now().isoformat()
+                }
+            except:
+                # Try English
+                english_text = recognizer.recognize_google(audio_data, language='en-IN')
+                return {
+                    'original_hindi': english_text,
+                    'translated_english': english_text,
+                    'confidence': 0.7,
+                    'method': 'Google Speech API (English)',
+                    'timestamp': datetime.datetime.now().isoformat()
+                }
+                
+        except Exception as e:
+            return {
+                'error': f'All speech recognition methods failed: {str(e)}',
+                'method': 'Complete Failure'
+            }
+    
+    class ProductionSerpAPIConnector:
+    """Production SERP API with advanced error handling"""
     
     def __init__(self):
-        self.serpapi_key = get_secret('SERPAPI_KEY')  # Using secure secret function
-        self.api_mode = get_secret('API_MODE', 'demo')  # Using secure secret function
+        self.serpapi_key = get_secret('SERPAPI_KEY')
+        self.api_mode = get_secret('API_MODE', 'production')
         
         if not self.serpapi_key or self.serpapi_key == 'demo_key':
-            st.warning("⚠️ SERP API in demo mode. Add real key for live data.")
-        elif not SERPAPI_AVAILABLE:
-            st.error("❌ SERP API library not installed")
-        else:
-            st.success("✅ SERP API configured successfully")
+            st.error("❌ SERP API key required for production mode")
+            st.stop()
         
-        # Marketplace search configurations
+        if not SERPAPI_AVAILABLE:
+            st.error("❌ SERP API library not available")
+            st.stop()
+        
+        st.success("✅ Production SERP API initialized")
+        
+        # Enhanced marketplace configurations
         self.marketplace_configs = {
             'amazon': {
                 'engine': 'google_shopping',
                 'site_filter': 'amazon.in',
-                'search_type': 'shopping'
+                'search_type': 'shopping',
+                'location': 'India',
+                'gl': 'in',
+                'hl': 'en'
             },
             'flipkart': {
                 'engine': 'google_shopping', 
                 'site_filter': 'flipkart.com',
-                'search_type': 'shopping'
+                'search_type': 'shopping',
+                'location': 'India',
+                'gl': 'in',
+                'hl': 'en'
             },
             'bigbasket': {
                 'engine': 'google_shopping',
                 'site_filter': 'bigbasket.com',
-                'search_type': 'shopping'
+                'search_type': 'shopping',
+                'location': 'India',
+                'gl': 'in',
+                'hl': 'en'
             },
             'myntra': {
                 'engine': 'google_shopping',
                 'site_filter': 'myntra.com', 
-                'search_type': 'shopping'
+                'search_type': 'shopping',
+                'location': 'India',
+                'gl': 'in',
+                'hl': 'en'
             },
             'nykaa': {
                 'engine': 'google_shopping',
                 'site_filter': 'nykaa.com',
-                'search_type': 'shopping'
+                'search_type': 'shopping',
+                'location': 'India',
+                'gl': 'in',
+                'hl': 'en'
             }
-        }
-        
-        # Enhanced fallback product database
-        self.product_database = {
-            # Dairy
-            'milk': {'base_price': 28, 'unit': '500ml', 'category': 'dairy'},
-            'paneer': {'base_price': 80, 'unit': '200g', 'category': 'dairy'},
-            'butter': {'base_price': 50, 'unit': '100g', 'category': 'dairy'},
-            'cheese': {'base_price': 150, 'unit': '200g', 'category': 'dairy'},
-            'yogurt': {'base_price': 25, 'unit': '400g', 'category': 'dairy'},
-            'curd': {'base_price': 30, 'unit': '500g', 'category': 'dairy'},
-            
-            # Staples
-            'bread': {'base_price': 25, 'unit': '1 loaf', 'category': 'staples'},
-            'rice': {'base_price': 40, 'unit': '1kg', 'category': 'staples'},
-            'dal': {'base_price': 90, 'unit': '1kg', 'category': 'staples'},
-            'flour': {'base_price': 35, 'unit': '1kg', 'category': 'staples'},
-            'oil': {'base_price': 120, 'unit': '1L', 'category': 'staples'},
-            'sugar': {'base_price': 42, 'unit': '1kg', 'category': 'staples'},
-            'salt': {'base_price': 20, 'unit': '1kg', 'category': 'staples'},
-            
-            # Proteins
-            'eggs': {'base_price': 6, 'unit': '1 piece', 'category': 'proteins'},
-            'chicken': {'base_price': 180, 'unit': '1kg', 'category': 'proteins'},
-            'fish': {'base_price': 200, 'unit': '1kg', 'category': 'proteins'},
-            
-            # Vegetables
-            'onion': {'base_price': 30, 'unit': '1kg', 'category': 'vegetables'},
-            'potato': {'base_price': 25, 'unit': '1kg', 'category': 'vegetables'},
-            'tomato': {'base_price': 40, 'unit': '1kg', 'category': 'vegetables'},
-            'carrot': {'base_price': 35, 'unit': '500g', 'category': 'vegetables'},
-            'spinach': {'base_price': 25, 'unit': '500g', 'category': 'vegetables'},
-            
-            # Fruits
-            'apple': {'base_price': 120, 'unit': '1kg', 'category': 'fruits'},
-            'banana': {'base_price': 40, 'unit': '1kg', 'category': 'fruits'},
-            'orange': {'base_price': 60, 'unit': '1kg', 'category': 'fruits'},
-            'mango': {'base_price': 100, 'unit': '1kg', 'category': 'fruits'},
-            
-            # Household
-            'soap': {'base_price': 30, 'unit': '100g', 'category': 'household'},
-            'detergent': {'base_price': 180, 'unit': '1kg', 'category': 'household'},
-            'toothpaste': {'base_price': 80, 'unit': '100g', 'category': 'household'},
-            'shampoo': {'base_price': 150, 'unit': '200ml', 'category': 'household'},
-            
-            # Beverages
-            'tea': {'base_price': 250, 'unit': '500g', 'category': 'beverages'},
-            'coffee': {'base_price': 400, 'unit': '200g', 'category': 'beverages'},
-            'juice': {'base_price': 60, 'unit': '1L', 'category': 'beverages'},
-            
-            # Snacks
-            'biscuits': {'base_price': 50, 'unit': '200g', 'category': 'snacks'},
-            'chips': {'base_price': 20, 'unit': '50g', 'category': 'snacks'}
         }
     
     def search_real_product_prices(self, product_name: str) -> Dict:
-        """Search using real SERP API"""
-        if not SERPAPI_AVAILABLE or not self.serpapi_key or self.serpapi_key == 'demo_key':
-            st.info("ℹ️ Using intelligent fallback - Real SERP API not available")
-            return self.generate_fallback_data(product_name)
+        """Production search with real SERP API"""
+        st.info(f"🔍 Searching real-time prices for: {product_name}")
         
         results = {}
         
-        # Try real SERP API for each marketplace
         for marketplace, config in self.marketplace_configs.items():
             try:
-                real_data = self.fetch_real_serp_data(product_name, marketplace, config)
-                if real_data:
-                    results[marketplace] = real_data
-                    st.success(f"✅ Real data from {marketplace.title()} via SERP API")
-                else:
-                    # Fallback for this marketplace
-                    results[marketplace] = self.generate_single_fallback(product_name, marketplace)
-                    st.info(f"ℹ️ Fallback data for {marketplace.title()}")
+                with st.spinner(f"Fetching from {marketplace.title()}..."):
+                    real_data = self.fetch_production_serp_data(product_name, marketplace, config)
+                    
+                    if real_data:
+                        results[marketplace] = real_data
+                        st.success(f"✅ Real data from {marketplace.title()}")
+                    else:
+                        st.warning(f"⚠️ No results from {marketplace.title()}")
                 
             except Exception as e:
-                st.warning(f"⚠️ SERP API error for {marketplace}: {str(e)}")
-                results[marketplace] = self.generate_single_fallback(product_name, marketplace)
+                st.error(f"❌ Error fetching from {marketplace}: {str(e)}")
         
         return results
     
-    def fetch_real_serp_data(self, product_name: str, marketplace: str, config: Dict) -> Optional[Dict]:
-        """Fetch real data from SERP API"""
+    def fetch_production_serp_data(self, product_name: str, marketplace: str, config: Dict) -> Optional[Dict]:
+        """Fetch production data with advanced error handling"""
         try:
-            # Configure search parameters
-            if config['search_type'] == 'shopping':
-                search_params = {
-                    "engine": "google_shopping",
-                    "q": f"{product_name} site:{config['site_filter']}",
-                    "api_key": self.serpapi_key,
-                    "location": "India",
-                    "hl": "en",
-                    "gl": "in",
-                    "num": 5
-                }
-            else:
-                search_params = {
-                    "engine": "google",
-                    "q": f"{product_name} site:{config['site_filter']} price buy",
-                    "api_key": self.serpapi_key,
-                    "location": "India",
-                    "hl": "en",
-                    "gl": "in",
-                    "num": 5
-                }
+            search_params = {
+                "engine": config['engine'],
+                "q": f"{product_name} site:{config['site_filter']}",
+                "api_key": self.serpapi_key,
+                "location": config['location'],
+                "gl": config['gl'],
+                "hl": config['hl'],
+                "num": 10,
+                "no_cache": True  # Always get fresh data
+            }
             
-            # Perform real search
+            # Make the API call
             search = GoogleSearch(search_params)
             search_results = search.get_dict()
             
-            # Parse real results
-            return self.parse_real_serp_response(search_results, marketplace, product_name)
+            # Enhanced result parsing
+            return self.parse_production_serp_response(search_results, marketplace, product_name)
             
         except Exception as e:
-            st.error(f"Real SERP API call failed for {marketplace}: {str(e)}")
-            return None
-    
-    def parse_real_serp_response(self, data: Dict, marketplace: str, product_name: str) -> Optional[Dict]:
-        """Parse real SERP API response"""
-        try:
-            # For Google Shopping results
-            if 'shopping_results' in data and len(data['shopping_results']) > 0:
-                products = data['shopping_results']
-                
-                # Filter for relevant marketplace
-                marketplace_products = [p for p in products if marketplace in p.get('link', '').lower()]
-                
-                if marketplace_products:
-                    product = marketplace_products[0]
-                else:
-                    product = products[0]  # Use first result if no marketplace-specific result
-                
-                # Extract price
-                price_str = product.get('price', '₹50')
-                price = self.extract_real_price(price_str)
-                
-                return {
-                    'price': price,
-                    'title': product.get('title', f"{product_name.title()} - {marketplace.title()}"),
-                    'availability': True,
-                    'delivery_fee': random.uniform(0, 50),  # SERP API doesn't always have delivery info
-                    'delivery_time': self.estimate_delivery_time(marketplace),
-                    'rating': product.get('rating', random.uniform(3.8, 4.6)),
-                    'source': 'Real SERP API',
-                    'marketplace_url': product.get('link', ''),
-                    'thumbnail': product.get('thumbnail', ''),
-                    'stock': 'In Stock',
-                    'serp_position': product.get('position', 1)
-                }
-            
-            # For organic search results
-            elif 'organic_results' in data and len(data['organic_results']) > 0:
-                results = data['organic_results']
-                
-                for result in results:
-                    if marketplace in result.get('link', '').lower():
-                        # Extract price from snippet or title
-                        snippet = result.get('snippet', '')
-                        title = result.get('title', '')
-                        price = self.extract_price_from_text(snippet + ' ' + title)
-                        
-                        if price == 0:
-                            price = self.get_estimated_price(product_name, marketplace)
-                        
-                        return {
-                            'price': price,
-                            'title': title or f"{product_name.title()} - {marketplace.title()}",
-                            'availability': True,
-                            'delivery_fee': random.uniform(20, 50),
-                            'delivery_time': self.estimate_delivery_time(marketplace),
-                            'rating': random.uniform(3.8, 4.6),
-                            'source': 'Real SERP API (Organic)',
-                            'marketplace_url': result.get('link', ''),
-                            'stock': 'Available'
-                        }
-            
+            st.error(f"SERP API call failed for {marketplace}: {str(e)}")
             return None
             
-        except Exception as e:
-            st.warning(f"Error parsing real SERP response for {marketplace}: {str(e)}")
-            return None
-    
-    def extract_real_price(self, price_str: str) -> float:
-        """Extract numeric price from real price string"""
-        try:
-            import re
-            # Remove currency symbols and extract numbers
-            numbers = re.findall(r'[\d,]+\.?\d*', str(price_str))
-            if numbers:
-                price_clean = numbers[0].replace(',', '')
-                return float(price_clean)
-        except:
-            pass
-        return self.get_estimated_price("generic", "amazon")
-    
-    def extract_price_from_text(self, text: str) -> float:
-        """Extract price from text snippet"""
-        try:
-            import re
-            price_patterns = [
-                r'₹\s*(\d+(?:,\d+)*(?:\.\d+)?)',
-                r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d+)?)',
-                r'INR\s*(\d+(?:,\d+)*(?:\.\d+)?)',
-                r'(\d+(?:,\d+)*(?:\.\d+)?)\s*rupees?'
-            ]
-            
-            for pattern in price_patterns:
-                matches = re.findall(pattern, text, re.IGNORECASE)
-                if matches:
-                    price_str = matches[0].replace(',', '')
-                    return float(price_str)
-        except:
-            pass
-        return 0
-    
-    def estimate_delivery_time(self, marketplace: str) -> str:
-        """Estimate delivery time based on marketplace"""
-        delivery_times = {
-            'amazon': '1-2 days',
-            'flipkart': '2-3 days',
-            'bigbasket': '2-4 hours',
-            'myntra': '2-5 days',
-            'nykaa': '3-7 days'
-        }
-        return delivery_times.get(marketplace, '1-3 days')
-    
-    def get_estimated_price(self, product_name: str, marketplace: str) -> float:
-        """Get estimated price when real price not found"""
-        product_key = self.find_product_key(product_name)
-        product_info = self.product_database.get(product_key, {'base_price': 50})
-        
-        base_price = product_info['base_price']
-        
-        # Marketplace-specific multipliers
-        multipliers = {
-            'amazon': random.uniform(0.9, 1.1),
-            'flipkart': random.uniform(0.85, 1.05),
-            'bigbasket': random.uniform(0.95, 1.15),
-            'myntra': random.uniform(1.0, 1.2),
-            'nykaa': random.uniform(1.05, 1.25)
-        }
-        
-        multiplier = multipliers.get(marketplace, 1.0)
-        return round(base_price * multiplier, 2)
-    
-    def find_product_key(self, product_name: str) -> str:
-        """Find matching product key"""
-        product_lower = product_name.lower()
-        
-        if product_lower in self.product_database:
-            return product_lower
-        
-        for key in self.product_database.keys():
-            if key in product_lower or product_lower in key:
-                return key
-        
-        return 'milk'
-    
-    def generate_single_fallback(self, product_name: str, marketplace: str) -> Dict:
-        """Generate fallback data for single marketplace"""
-        product_key = self.find_product_key(product_name)
-        product_info = self.product_database.get(product_key, {
-            'base_price': 50, 'unit': '1 unit', 'category': 'general'
-        })
-        
-        base_price = product_info['base_price']
-        final_price = self.get_estimated_price(product_name, marketplace)
-        
-        # Add seasonal and market variations
-        seasonal_factor = self.get_seasonal_factor(product_info['category'])
-        final_price *= seasonal_factor
-        
-        return {
-            'price': round(final_price, 2),
-            'title': f"{product_name.title()} ({product_info['unit']}) - {marketplace.title()}",
-            'availability': random.choice([True, True, True, False]),
-            'delivery_fee': round(random.uniform(0, 50), 2),
-            'delivery_time': self.estimate_delivery_time(marketplace),
-            'rating': round(random.uniform(3.8, 4.8), 1),
-            'source': 'Intelligent Fallback' if self.serpapi_key == 'demo_key' else 'SERP API Fallback',
-            'unit': product_info['unit'],
-            'category': product_info['category']
-        }
-    
-    def get_seasonal_factor(self, category: str) -> float:
-        """Add realistic seasonal price variations"""
-        current_month = datetime.datetime.now().month
-        
-        if category == 'vegetables':
-            if current_month in [6, 7, 8, 9]:  # Monsoon
-                return random.uniform(1.1, 1.3)
-            else:
-                return random.uniform(0.9, 1.1)
-        elif category == 'fruits':
-            if current_month in [3, 4, 5]:  # Summer
-                return random.uniform(0.8, 1.0)
-            else:
-                return random.uniform(1.0, 1.2)
-        else:
-            return random.uniform(0.95, 1.05)
-    
-    def generate_fallback_data(self, product_name: str) -> Dict:
-        """Generate fallback data for all marketplaces"""
-        results = {}
-        for marketplace in self.marketplace_configs.keys():
-            results[marketplace] = self.generate_single_fallback(product_name, marketplace)
-        return results
-
 class AIShoppingIntelligence:
     """AI for shopping recommendations using real models when available"""
     
