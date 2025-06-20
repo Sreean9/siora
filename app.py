@@ -329,8 +329,7 @@ class RealVaaniSpeechProcessor:
                 'error': f'All speech recognition methods failed: {str(e)}',
                 'method': 'Complete Failure'
             }
-    
-  class ProductionSerpAPIConnector:
+class ProductionSerpAPIConnector:
     """Production SERP API with advanced error handling"""
     
     def __init__(self):
