@@ -330,8 +330,11 @@ class RealVaaniSpeechProcessor:
                 'method': 'Complete Failure'
             }
     
-    class ProductionSerpAPIConnector:
+  class ProductionSerpAPIConnector:
     """Production SERP API with advanced error handling"""
+    
+    def __init__(self):  # This needs 4 spaces indentation
+        self.serpapi_key = get_secret('SERPAPI_KEY')
     
     def __init__(self):
         self.serpapi_key = get_secret('SERPAPI_KEY')
