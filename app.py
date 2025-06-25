@@ -17,6 +17,11 @@ import warnings
 import sys
 import subprocess
 import os
+
+# Clear cache on startup to avoid AttributeError
+if 'cache_cleared' not in st.session_state:
+    st.cache_resource.clear()
+    st.session_state.cache_cleared = True
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 warnings.filterwarnings("ignore")
