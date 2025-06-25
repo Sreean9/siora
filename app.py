@@ -482,104 +482,100 @@ def __init__(self):
         self.hf_token = get_secret('HUGGINGFACE_TOKEN')
         st.success("✅ Shopping AI initialized")
 def intelligent_product_analysis(self, shopping_list):
-        """AI analysis of shopping list"""
-        analysis = {
-            'categories': {},
-            'suggestions': [],
-            'insights': [],
-            'estimated_total': 0,
-            'health_score': 0,
-            'complementary_items': [],
-            'seasonal_recommendations': [],
-            'ai_sentiment': {},
-            'category_confidence': {}
-        }
-        
-        # Basic categorization
-        categories = {
-            'Staples': ['rice', 'wheat', 'flour', 'dal', 'oil', 'sugar', 'salt', 'bread'],
-            'Vegetables': ['onion', 'potato', 'tomato', 'carrot', 'spinach', 'cabbage', 'beans'],
-            'Fruits': ['apple', 'banana', 'orange', 'mango', 'grapes', 'pomegranate'],
-            'Dairy': ['milk', 'cheese', 'butter', 'yogurt', 'paneer', 'curd', 'ghee'],
-            'Proteins': ['chicken', 'mutton', 'fish', 'eggs', 'paneer', 'tofu'],
-            'Household': ['soap', 'detergent', 'toothpaste', 'shampoo', 'tissue'],
-            'Beverages': ['tea', 'coffee', 'juice', 'water'],
-            'Snacks': ['biscuits', 'chips', 'namkeen', 'chocolate']
-        }
-        
-        for item in shopping_list:
-            item_lower = item.lower()
-            category = 'Other'
-            confidence = 0.5
-            
-            for cat, keywords in categories.items():
-                if any(keyword in item_lower for keyword in keywords):
-                    category = cat
-                    confidence = 0.8
-                    break
-            
-            if category not in analysis['categories']:
-                analysis['categories'][category] = []
-            analysis['categories'][category].append(item)
-            
-            # Store confidence
-            analysis['category_confidence'][item] = {
-                'category': category,
-                'confidence': confidence,
-                'ai_method': 'Rule-Based Classification'
+        """AI analysis of shopping list - COMPLETE METHOD"""
+        try:
+            analysis = {
+                'categories': {},
+                'suggestions': [],
+                'insights': [],
+                'estimated_total': 0,
+                'health_score': 0,
+                'complementary_items': [],
+                'seasonal_recommendations': [],
+                'ai_sentiment': {},
+                'category_confidence': {}
             }
-        
-        # Generate insights
-        category_count = len([cat for cat in analysis['categories'].keys() if cat != 'Other'])
-        
-        if category_count >= 4:
-            analysis['insights'].append("🥗 Excellent variety across multiple food categories!")
-            analysis['health_score'] = 85
-        elif category_count >= 2:
-            analysis['insights'].append("📊 Good category diversity in your shopping list")
-            analysis['health_score'] = 70
-        else:
-            analysis['insights'].append("📝 Consider adding more variety to your shopping")
-            analysis['health_score'] = 50
-        
-        # Generate suggestions
-        if 'Vegetables' not in analysis['categories']:
-            analysis['suggestions'].append("🥬 Add vegetables for better nutrition")
-        
-        if 'Fruits' not in analysis['categories']:
-            analysis['suggestions'].append("🍎 Include fruits for vitamins")
-        
-        if 'Proteins' not in analysis['categories']:
-            analysis['suggestions'].append("🥩 Add protein sources like eggs or chicken")
-        
-        # Complementary items
-        complementary = []
-        if 'dal' in ' '.join(shopping_list).lower():
-            complementary.extend(['turmeric', 'cumin', 'rice'])
-        if 'bread' in ' '.join(shopping_list).lower():
-            complementary.extend(['butter', 'jam'])
-        if 'tea' in ' '.join(shopping_list).lower():
-            complementary.extend(['milk', 'sugar'])
-        
-        analysis['complementary_items'] = list(set(complementary))[:3]
-        
-        return analysis
-def suggest_complementary_items(self, shopping_list):
-        """Suggest complementary items"""
-        complementary = []
-        shopping_text = ' '.join(shopping_list).lower()
-        
-        # Recipe-based suggestions
-        if 'dal' in shopping_text:
-            complementary.extend(['turmeric', 'cumin', 'onion'])
-        if 'rice' in shopping_text:
-            complementary.extend(['dal', 'ghee'])
-        if 'bread' in shopping_text:
-            complementary.extend(['butter', 'jam', 'peanut butter'])
-        if 'milk' in shopping_text:
-            complementary.extend(['cereal', 'tea', 'coffee'])
-        
-        return list(set(complementary))[:3]
+            
+            # Basic categorization
+            categories = {
+                'Staples': ['rice', 'wheat', 'flour', 'dal', 'oil', 'sugar', 'salt', 'bread'],
+                'Vegetables': ['onion', 'potato', 'tomato', 'carrot', 'spinach', 'cabbage', 'beans'],
+                'Fruits': ['apple', 'banana', 'orange', 'mango', 'grapes', 'pomegranate'],
+                'Dairy': ['milk', 'cheese', 'butter', 'yogurt', 'paneer', 'curd', 'ghee'],
+                'Proteins': ['chicken', 'mutton', 'fish', 'eggs', 'paneer', 'tofu'],
+                'Household': ['soap', 'detergent', 'toothpaste', 'shampoo', 'tissue'],
+                'Beverages': ['tea', 'coffee', 'juice', 'water'],
+                'Snacks': ['biscuits', 'chips', 'namkeen', 'chocolate']
+            }
+            
+            for item in shopping_list:
+                item_lower = item.lower()
+                category = 'Other'
+                confidence = 0.5
+                
+                for cat, keywords in categories.items():
+                    if any(keyword in item_lower for keyword in keywords):
+                        category = cat
+                        confidence = 0.8
+                        break
+                
+                if category not in analysis['categories']:
+                    analysis['categories'][category] = []
+                analysis['categories'][category].append(item)
+                
+                analysis['category_confidence'][item] = {
+                    'category': category,
+                    'confidence': confidence,
+                    'ai_method': 'Rule-Based Classification'
+                }
+            
+            # Generate insights
+            category_count = len([cat for cat in analysis['categories'].keys() if cat != 'Other'])
+            
+            if category_count >= 4:
+                analysis['insights'].append("🥗 Excellent variety across multiple food categories!")
+                analysis['health_score'] = 85
+            elif category_count >= 2:
+                analysis['insights'].append("📊 Good category diversity in your shopping list")
+                analysis['health_score'] = 70
+            else:
+                analysis['insights'].append("📝 Consider adding more variety to your shopping")
+                analysis['health_score'] = 50
+            
+            # Generate suggestions
+            if 'Vegetables' not in analysis['categories']:
+                analysis['suggestions'].append("🥬 Add vegetables for better nutrition")
+            
+            if 'Fruits' not in analysis['categories']:
+                analysis['suggestions'].append("🍎 Include fruits for vitamins")
+            
+            if 'Proteins' not in analysis['categories']:
+                analysis['suggestions'].append("🥩 Add protein sources like eggs or chicken")
+            
+            # Complementary items
+            complementary = []
+            shopping_text = ' '.join(shopping_list).lower()
+            if 'dal' in shopping_text:
+                complementary.extend(['turmeric', 'cumin', 'rice'])
+            if 'bread' in shopping_text:
+                complementary.extend(['butter', 'jam'])
+            if 'tea' in shopping_text:
+                complementary.extend(['milk', 'sugar'])
+            
+            analysis['complementary_items'] = list(set(complementary))[:3]
+            
+            return analysis
+            
+        except Exception as e:
+            st.error(f"AI analysis error: {e}")
+            return {
+                'categories': {},
+                'suggestions': [],
+                'insights': ['AI analysis temporarily unavailable'],
+                'health_score': 50,
+                'complementary_items': [],
+                'category_confidence': {}
+            }
 class RealSmartBudgetAI:
     """Real AI-powered budget analysis"""
 def __init__(self):
@@ -1948,7 +1944,7 @@ apply_real_ai_css()
 def main():
     """Main Siora application with real AI integration"""
     
-    # Header with real AI indicators
+    # Header
     st.markdown("""
     <div style="text-align: center; padding: 20px;">
         <h1>🛒 Siora - AI Shopping Buddy</h1>
@@ -1958,47 +1954,31 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Mode selection with proper functionality
+    # Mode selection
     st.markdown("### 🎯 Choose Your Shopping Mode")
     app_mode = st.selectbox(
         "Select Mode:",
         ["🛒 Smart Shopping", "🎤 Voice Shopping", "📊 Budget AI", "📈 Price Analytics", "🔍 Market Intelligence"],
-        index=0,
-        key="app_mode_selector"
+        key="mode_selector"
     )
-    
-    # Real AI Status Indicators
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        serp_status = "🟢 Live" if get_secret('SERPAPI_KEY') != 'demo_key' else "🟡 Demo"
-        st.markdown(f'<div class="api-status-{"live" if "Live" in serp_status else "demo"}">SERP API: {serp_status}</div>', unsafe_allow_html=True)
-    
-    with col2:
-        hf_status = "🟢 Live" if get_secret('HUGGINGFACE_TOKEN') != 'demo_key' else "🟡 Demo"
-        st.markdown(f'<div class="api-status-{"live" if "Live" in hf_status else "demo"}">HuggingFace: {hf_status}</div>', unsafe_allow_html=True)
-    
-    with col3:
-        transformers_status = "🟢 Ready" if TRANSFORMERS_AVAILABLE else "🔄 Loading"
-        st.markdown(f'<div class="api-status-{"live" if "Ready" in transformers_status else "demo"}">AI Models: {transformers_status}</div>', unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown(f'<div class="real-time-indicator">⚡ Real-Time Mode</div>', unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Route to correct interface based on selection
+    # Route to interfaces
     if app_mode == "🛒 Smart Shopping":
         smart_shopping_interface()
     elif app_mode == "🎤 Voice Shopping":
-        voice_shopping_interface()
+        st.markdown("### 🎤 Voice Shopping Interface")
+        st.info("Voice shopping interface - coming up next!")
     elif app_mode == "📊 Budget AI":
-        budget_ai_interface()
+        st.markdown("### 📊 Budget AI Interface")
+        st.info("Budget AI interface - coming up next!")
     elif app_mode == "📈 Price Analytics":
-        price_analytics_interface()
+        st.markdown("### 📈 Price Analytics Interface")
+        st.info("Price analytics interface - coming up next!")
     elif app_mode == "🔍 Market Intelligence":
-        market_intelligence_interface()
-def smart_shopping_interface():
+        st.markdown("### 🔍 Market Intelligence Interface")
+        st.info("Market intelligence interface - coming up next!")def smart_shopping_interface():
     """Smart shopping interface with AI recommendations"""
     st.markdown('<div class="real-ai-indicator">🧠 AI Shopping Intelligence Active</div>', unsafe_allow_html=True)
     
@@ -2015,18 +1995,18 @@ def smart_shopping_interface():
             horizontal=True
         )
         
-        shopping_list = []
+        # Initialize shopping list in session state
+        if 'shopping_list' not in st.session_state:
+            st.session_state.shopping_list = []
         
         if input_method == "Type individually":
-            # Individual item input with AI suggestions
+            # Individual item input
             new_item = st.text_input("Add item:", placeholder="e.g., milk, bread, apples")
             
-            if new_item:
-                if st.button("Add Item"):
-                    if 'shopping_list' not in st.session_state:
-                        st.session_state.shopping_list = []
-                    st.session_state.shopping_list.append(new_item)
-                    st.success(f"Added: {new_item}")
+            if new_item and st.button("Add Item"):
+                st.session_state.shopping_list.append(new_item)
+                st.success(f"Added: {new_item}")
+                st.rerun()
         
         elif input_method == "Paste bulk list":
             bulk_text = st.text_area(
@@ -2035,47 +2015,57 @@ def smart_shopping_interface():
             )
             if bulk_text and st.button("Process Bulk List"):
                 items = [item.strip() for item in bulk_text.split('\n') if item.strip()]
-                st.session_state.shopping_list = items
+                st.session_state.shopping_list.extend(items)
+                st.session_state.shopping_list = list(set(st.session_state.shopping_list))  # Remove duplicates
                 st.success(f"Added {len(items)} items!")
+                st.rerun()
         
         elif input_method == "Upload from file":
             uploaded_file = st.file_uploader("Upload shopping list", type=['txt', 'csv'])
             if uploaded_file:
-                content = uploaded_file.read().decode('utf-8')
-                items = [item.strip() for item in content.split('\n') if item.strip()]
-                st.session_state.shopping_list = items
-                st.success(f"Loaded {len(items)} items from file!")
+                try:
+                    content = uploaded_file.read().decode('utf-8')
+                    items = [item.strip() for item in content.split('\n') if item.strip()]
+                    st.session_state.shopping_list.extend(items)
+                    st.session_state.shopping_list = list(set(st.session_state.shopping_list))  # Remove duplicates
+                    st.success(f"Loaded {len(items)} items from file!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"File upload error: {e}")
     
     with col2:
         st.markdown("### 🤖 AI Suggestions")
-        if 'shopping_list' in st.session_state and st.session_state.shopping_list:
-    # AI analysis of current list
-    if ai_components['shopping_ai'] is not None:
-        try:
-            ai_analysis = ai_components['shopping_ai'].intelligent_product_analysis(st.session_state.shopping_list)
-            
-            # Display health score
-            health_score = ai_analysis.get('health_score', 50)
-            score_class = "high" if health_score >= 70 else "medium" if health_score >= 40 else "low"
-            st.markdown(f'<div class="confidence-indicator health-score-{score_class}">Health Score: {health_score}/100</div>', unsafe_allow_html=True)
-            
-            # Show AI insights
-            for insight in ai_analysis.get('insights', [])[:3]:
-                st.info(insight)
-            
-            # Complementary items
-            if ai_analysis.get('complementary_items'):
-                st.markdown("**AI Suggests Adding:**")
-                for item in ai_analysis['complementary_items'][:3]:
-                    if st.button(f"+ {item}", key=f"add_{item}"):
-                        st.session_state.shopping_list.append(item)
-                        st.rerun()
-        except Exception as e:
-            st.warning(f"AI analysis temporarily unavailable: {e}")
-    else:
-        st.info("🤖 AI analysis loading...")
+        if st.session_state.shopping_list:
+            try:
+                # AI analysis of current list
+                if ai_components and ai_components.get('shopping_ai'):
+                    ai_analysis = ai_components['shopping_ai'].intelligent_product_analysis(st.session_state.shopping_list)
+                    
+                    # Display health score
+                    health_score = ai_analysis.get('health_score', 50)
+                    score_class = "high" if health_score >= 70 else "medium" if health_score >= 40 else "low"
+                    st.markdown(f'<div class="confidence-indicator health-score-{score_class}">Health Score: {health_score}/100</div>', unsafe_allow_html=True)
+                    
+                    # Show AI insights
+                    for insight in ai_analysis.get('insights', [])[:3]:
+                        st.info(insight)
+                    
+                    # Complementary items
+                    if ai_analysis.get('complementary_items'):
+                        st.markdown("**AI Suggests Adding:**")
+                        for item in ai_analysis['complementary_items'][:3]:
+                            if st.button(f"+ {item}", key=f"add_{item}"):
+                                st.session_state.shopping_list.append(item)
+                                st.rerun()
+                else:
+                    st.warning("🤖 AI analysis temporarily unavailable")
+            except Exception as e:
+                st.warning(f"AI analysis error: {e}")
+        else:
+            st.info("Add items to see AI suggestions")
+    
     # Display current shopping list
-    if 'shopping_list' in st.session_state and st.session_state.shopping_list:
+    if st.session_state.shopping_list:
         st.markdown("### 🛍️ Your Smart Shopping List")
         
         # List management
@@ -2088,7 +2078,10 @@ def smart_shopping_interface():
                 st.rerun()
         with col3:
             if st.button("🔍 Get Best Prices"):
-                get_price_comparison(st.session_state.shopping_list)
+                if ai_components and ai_components.get('marketplace_connector'):
+                    get_price_comparison(st.session_state.shopping_list)
+                else:
+                    st.error("Marketplace connector not available")
         
         # Display items with remove option
         for i, item in enumerate(st.session_state.shopping_list):
@@ -2099,7 +2092,8 @@ def smart_shopping_interface():
                 if st.button("❌", key=f"remove_{i}"):
                     st.session_state.shopping_list.pop(i)
                     st.rerun()
-
+    else:
+        st.info("👆 Start by adding items to your shopping list above")
 def get_price_comparison(shopping_list):
     """Get comprehensive price comparison with real AI analysis"""
     if not shopping_list:
