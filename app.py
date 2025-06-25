@@ -272,8 +272,7 @@ def process_real_audio_with_vaani(self, audio_data):
         except Exception as e:
             st.error(f"AI processing error: {e}")
             return self.fallback_speech_recognition(audio_data)
-    
-    def capture_real_audio(self, duration=5):
+def capture_real_audio(self, duration=5):
         """Capture real audio from microphone"""
         if not sr:
             st.error("Speech recognition library not available")
@@ -289,8 +288,7 @@ def process_real_audio_with_vaani(self, audio_data):
         except Exception as e:
             st.error(f"Audio capture error: {str(e)}")
             return None
-    
-    def contains_hindi(self, text):
+def contains_hindi(self, text):
         """Enhanced Hindi detection"""
         hindi_ranges = [
             (0x0900, 0x097F),  # Devanagari
@@ -304,8 +302,7 @@ def process_real_audio_with_vaani(self, audio_data):
                 if start <= char_code <= end:
                     return True
         return False
-    
-    def fallback_speech_recognition(self, audio_data):
+def fallback_speech_recognition(self, audio_data):
         """Enhanced fallback using Google Speech API"""
         if not sr:
             return {'error': 'No speech recognition available'}
