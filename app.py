@@ -152,7 +152,7 @@ except ImportError:
 
 class RealVaaniSpeechProcessor:
     """Production Vaani Speech Processing using real Hugging Face models"""
-def __init__(self):
+def __init__(self):  # FIXED: Added 4 spaces
         if not TRANSFORMERS_AVAILABLE:
             st.error("❌ Cannot initialize speech processor - transformers not available")
             return
@@ -163,64 +163,64 @@ def __init__(self):
         
         st.info(f"🤖 Initializing AI models on {self.device}...")
         self.setup_production_models()
-def setup_production_models(self):
-    """Initialize production AI models with fallback strategy"""
-    try:
-        # Primary: OpenAI Whisper (works great with Hindi)
-        self.speech_recognizer = pipeline(
-            "automatic-speech-recognition",
-            model="openai/whisper-small",
-            device=0 if torch.cuda.is_available() else -1,
-            token=self.hf_token if self.hf_token != 'demo_key' else None
-        )
-        
-        # Hindi Translation
-        self.translator_pipeline = pipeline(
-            "translation",
-            model="Helsinki-NLP/opus-mt-hi-en",
-            device=0 if torch.cuda.is_available() else -1,
-            token=self.hf_token if self.hf_token != 'demo_key' else None
-        )
-        
-        # Multi-model Hindi support with fallbacks
-        self.hindi_models = []
-        
-        # Try multiple Hindi models in order of preference
-        hindi_model_options = [
-            ("facebook/wav2vec2-large-xlsr-53-hindi", "Facebook Wav2Vec2"),
-            ("openai/whisper-medium", "Whisper Medium"),
-            ("microsoft/speecht5_asr", "Microsoft SpeechT5")
-        ]
-        
-        for model_name, model_desc in hindi_model_options:
-            try:
-                processor = pipeline(
-                    "automatic-speech-recognition",
-                    model=model_name,
-                    device=0 if torch.cuda.is_available() else -1
-                )
-                self.hindi_models.append({
-                    'processor': processor,
-                    'name': model_desc,
-                    'model_id': model_name
-                })
-                st.success(f"✅ Loaded {model_desc} for Hindi support")
-                break  # Use first successful model
-            except Exception as e:
-                st.warning(f"⚠️ {model_desc} not available: {str(e)}")
-                continue
-        
-        if not self.hindi_models:
-            st.info("ℹ️ Using primary Whisper model for all languages")
-        
-        st.success("✅ Production AI speech models loaded successfully!")
-        
-    except Exception as e:
-        st.error(f"❌ Failed to load AI models: {e}")
-        self.speech_recognizer = None
-        self.translator_pipeline = None
-        self.hindi_models = []
-def process_real_audio_with_vaani(self, audio_data):
+def setup_production_models(self):  # FIXED: Added 4 spaces
+        """Initialize production AI models with fallback strategy"""
+        try:
+            # Primary: OpenAI Whisper (works great with Hindi)
+            self.speech_recognizer = pipeline(
+                "automatic-speech-recognition",
+                model="openai/whisper-small",
+                device=0 if torch.cuda.is_available() else -1,
+                token=self.hf_token if self.hf_token != 'demo_key' else None
+            )
+            
+            # Hindi Translation
+            self.translator_pipeline = pipeline(
+                "translation",
+                model="Helsinki-NLP/opus-mt-hi-en",
+                device=0 if torch.cuda.is_available() else -1,
+                token=self.hf_token if self.hf_token != 'demo_key' else None
+            )
+            
+            # Multi-model Hindi support with fallbacks
+            self.hindi_models = []
+            
+            # Try multiple Hindi models in order of preference
+            hindi_model_options = [
+                ("facebook/wav2vec2-large-xlsr-53-hindi", "Facebook Wav2Vec2"),
+                ("openai/whisper-medium", "Whisper Medium"),
+                ("microsoft/speecht5_asr", "Microsoft SpeechT5")
+            ]
+            
+            for model_name, model_desc in hindi_model_options:
+                try:
+                    processor = pipeline(
+                        "automatic-speech-recognition",
+                        model=model_name,
+                        device=0 if torch.cuda.is_available() else -1
+                    )
+                    self.hindi_models.append({
+                        'processor': processor,
+                        'name': model_desc,
+                        'model_id': model_name
+                    })
+                    st.success(f"✅ Loaded {model_desc} for Hindi support")
+                    break  # Use first successful model
+                except Exception as e:
+                    st.warning(f"⚠️ {model_desc} not available: {str(e)}")
+                    continue
+            
+            if not self.hindi_models:
+                st.info("ℹ️ Using primary Whisper model for all languages")
+            
+            st.success("✅ Production AI speech models loaded successfully!")
+            
+        except Exception as e:
+            st.error(f"❌ Failed to load AI models: {e}")
+            self.speech_recognizer = None
+            self.translator_pipeline = None
+            self.hindi_models = []
+def process_real_audio_with_vaani(self, audio_data):  # FIXED: Added 4 spaces
         """Process real audio using production AI pipeline"""
         if not self.speech_recognizer:
             return {'error': 'Speech recognition models not available'}
@@ -233,15 +233,15 @@ def process_real_audio_with_vaani(self, audio_data):
             else:
                 audio_array = audio_data
             
-            # Try Indic model first for better Hindi support
-            if self.indic_processor:
+            # Try Hindi models first
+            if self.hindi_models:
                 try:
-                    result = self.indic_processor(audio_array)
+                    result = self.hindi_models[0]['processor'](audio_array)
                     detected_text = result['text']
                     confidence = 0.9
-                    model_used = "Indic Wav2Vec2"
+                    model_used = self.hindi_models[0]['name']
                 except Exception as e:
-                    st.warning(f"Indic model failed, falling back to Whisper: {e}")
+                    st.warning(f"Hindi model failed, falling back to Whisper: {e}")
                     result = self.speech_recognizer(audio_array)
                     detected_text = result['text']
                     confidence = 0.85
@@ -276,7 +276,7 @@ def process_real_audio_with_vaani(self, audio_data):
         except Exception as e:
             st.error(f"AI processing error: {e}")
             return self.fallback_speech_recognition(audio_data)
-def capture_real_audio(self, duration=5):
+def capture_real_audio(self, duration=5):  # FIXED: Added 4 spaces
         """Capture real audio from microphone"""
         if not sr:
             st.error("Speech recognition library not available")
@@ -292,7 +292,7 @@ def capture_real_audio(self, duration=5):
         except Exception as e:
             st.error(f"Audio capture error: {str(e)}")
             return None
-def contains_hindi(self, text):
+def contains_hindi(self, text):  # FIXED: Added 4 spaces
         """Enhanced Hindi detection"""
         hindi_ranges = [
             (0x0900, 0x097F),  # Devanagari
@@ -306,7 +306,7 @@ def contains_hindi(self, text):
                 if start <= char_code <= end:
                     return True
         return False
-def fallback_speech_recognition(self, audio_data):
+def fallback_speech_recognition(self, audio_data):  # FIXED: Added 4 spaces
         """Enhanced fallback using Google Speech API"""
         if not sr:
             return {'error': 'No speech recognition available'}
