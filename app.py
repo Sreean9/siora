@@ -11,6 +11,8 @@ import numpy as np
 import os
 from dotenv import load_dotenv
 import warnings
+# Add this line right after all your imports
+st.cache_resource.clear()
 
 warnings.filterwarnings("ignore")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
