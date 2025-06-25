@@ -121,6 +121,7 @@ def intelligent_product_analysis(self, shopping_list):
         return analysis
 
 class RealSerpAPIConnector:
+    """Real SERP API integration - works with current dependencies"""
 def __init__(self):
         self.serpapi_key = get_secret('SERPAPI_KEY')
         if self.serpapi_key != 'demo_key' and SERPAPI_AVAILABLE:
