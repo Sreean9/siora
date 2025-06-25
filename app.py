@@ -498,41 +498,88 @@ def intelligent_product_analysis(self, shopping_list):
         # Basic categorization
         categories = {
             'Staples': ['rice', 'wheat', 'flour', 'dal', 'oil', 'sugar', 'salt', 'bread'],
-            'Vegetables': ['onion', 'potato', 'tomato', 'carrot', 'spinach', 'cabbage'],
-            'Fruits': ['apple', 'banana', 'orange', 'mango', 'grapes'],
-            'Dairy': ['milk', 'cheese', 'butter', 'yogurt', 'paneer', 'curd'],
-            'Household': ['soap', 'detergent', 'toothpaste', 'shampoo']
+            'Vegetables': ['onion', 'potato', 'tomato', 'carrot', 'spinach', 'cabbage', 'beans'],
+            'Fruits': ['apple', 'banana', 'orange', 'mango', 'grapes', 'pomegranate'],
+            'Dairy': ['milk', 'cheese', 'butter', 'yogurt', 'paneer', 'curd', 'ghee'],
+            'Proteins': ['chicken', 'mutton', 'fish', 'eggs', 'paneer', 'tofu'],
+            'Household': ['soap', 'detergent', 'toothpaste', 'shampoo', 'tissue'],
+            'Beverages': ['tea', 'coffee', 'juice', 'water'],
+            'Snacks': ['biscuits', 'chips', 'namkeen', 'chocolate']
         }
         
         for item in shopping_list:
             item_lower = item.lower()
             category = 'Other'
+            confidence = 0.5
             
             for cat, keywords in categories.items():
                 if any(keyword in item_lower for keyword in keywords):
                     category = cat
+                    confidence = 0.8
                     break
             
             if category not in analysis['categories']:
                 analysis['categories'][category] = []
             analysis['categories'][category].append(item)
+            
+            # Store confidence
+            analysis['category_confidence'][item] = {
+                'category': category,
+                'confidence': confidence,
+                'ai_method': 'Rule-Based Classification'
+            }
         
         # Generate insights
-        if len(analysis['categories']) >= 3:
-            analysis['insights'].append("🥗 Good variety across multiple categories!")
-            analysis['health_score'] = 75
+        category_count = len([cat for cat in analysis['categories'].keys() if cat != 'Other'])
+        
+        if category_count >= 4:
+            analysis['insights'].append("🥗 Excellent variety across multiple food categories!")
+            analysis['health_score'] = 85
+        elif category_count >= 2:
+            analysis['insights'].append("📊 Good category diversity in your shopping list")
+            analysis['health_score'] = 70
         else:
-            analysis['insights'].append("📝 Consider adding more variety to your list")
+            analysis['insights'].append("📝 Consider adding more variety to your shopping")
             analysis['health_score'] = 50
         
         # Generate suggestions
         if 'Vegetables' not in analysis['categories']:
-            analysis['suggestions'].append("🥬 Add some vegetables for better nutrition")
+            analysis['suggestions'].append("🥬 Add vegetables for better nutrition")
         
         if 'Fruits' not in analysis['categories']:
-            analysis['suggestions'].append("🍎 Add fruits for vitamins and fiber")
+            analysis['suggestions'].append("🍎 Include fruits for vitamins")
+        
+        if 'Proteins' not in analysis['categories']:
+            analysis['suggestions'].append("🥩 Add protein sources like eggs or chicken")
+        
+        # Complementary items
+        complementary = []
+        if 'dal' in ' '.join(shopping_list).lower():
+            complementary.extend(['turmeric', 'cumin', 'rice'])
+        if 'bread' in ' '.join(shopping_list).lower():
+            complementary.extend(['butter', 'jam'])
+        if 'tea' in ' '.join(shopping_list).lower():
+            complementary.extend(['milk', 'sugar'])
+        
+        analysis['complementary_items'] = list(set(complementary))[:3]
         
         return analysis
+def suggest_complementary_items(self, shopping_list):
+        """Suggest complementary items"""
+        complementary = []
+        shopping_text = ' '.join(shopping_list).lower()
+        
+        # Recipe-based suggestions
+        if 'dal' in shopping_text:
+            complementary.extend(['turmeric', 'cumin', 'onion'])
+        if 'rice' in shopping_text:
+            complementary.extend(['dal', 'ghee'])
+        if 'bread' in shopping_text:
+            complementary.extend(['butter', 'jam', 'peanut butter'])
+        if 'milk' in shopping_text:
+            complementary.extend(['cereal', 'tea', 'coffee'])
+        
+        return list(set(complementary))[:3]
 class RealSmartBudgetAI:
     """Real AI-powered budget analysis"""
 def __init__(self):
@@ -1877,7 +1924,13 @@ def main():
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
+    # Add this right after the header in main() function
+    st.markdown("### 🎯 Choose Your Shopping Mode")
+    app_mode = st.selectbox(
+    "Select Mode:",
+    ["🛒 Smart Shopping", "🎤 Voice Shopping", "📊 Budget AI", "📈 Price Analytics", "🔍 Market Intelligence"],
+    index=0
+    )
     # Real AI Status Indicators
     col1, col2, col3, col4 = st.columns(4)
     
