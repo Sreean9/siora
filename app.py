@@ -147,8 +147,7 @@ except ImportError:
 
 class RealVaaniSpeechProcessor:
     """Production Vaani Speech Processing using real Hugging Face models"""
-    
-    def __init__(self):
+def __init__(self):
         if not TRANSFORMERS_AVAILABLE:
             st.error("❌ Cannot initialize speech processor - transformers not available")
             return
