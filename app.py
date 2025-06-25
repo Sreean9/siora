@@ -194,6 +194,82 @@ def search_real_prices(self, product_name):
         except Exception as e:
             st.warning(f"Real search completely failed: {e}")
             return self.generate_smart_estimates(product_name)
+def get_price_comparison(shopping_list):
+    """Get comprehensive price comparison with proper error handling"""
+    if not shopping_list:
+        st.warning("No items to search for!")
+        return
+    
+    st.markdown('<div style="background: linear-gradient(135deg, #4CAF50, #8BC34A); color: white; padding: 10px; border-radius: 10px; text-align: center;"><strong>⚡ Real-Time Price Analysis</strong></div>', unsafe_allow_html=True)
+    
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    all_results = {}
+    total_items = len(shopping_list)
+    
+    # Create a fresh connector instance to avoid cache issues
+    try:
+        marketplace_connector = RealSerpAPIConnector()
+    except Exception as e:
+        st.error(f"Failed to initialize marketplace connector: {e}")
+        return
+    
+    for i, item in enumerate(shopping_list):
+        status_text.text(f"🔍 Searching {item}... ({i+1}/{total_items})")
+        progress_bar.progress((i + 1) / total_items)
+        
+        try:
+            # Use the fresh connector instance
+            marketplace_data = marketplace_connector.search_real_product_prices(item)
+            all_results[item] = marketplace_data
+        except Exception as e:
+            st.warning(f"Error searching for {item}: {e}")
+            # Generate fallback data
+            all_results[item] = generate_fallback_price_data(item)
+        
+        # Small delay for better UX
+        time.sleep(0.5)
+    
+    status_text.text("✅ Analysis complete!")
+    progress_bar.progress(1.0)
+    
+    # Display results
+    display_price_comparison_results(all_results, shopping_list)
+
+def generate_fallback_price_data(item):
+    """Generate fallback price data when search fails"""
+    marketplaces = ['amazon', 'flipkart', 'bigbasket', 'myntra']
+    results = {}
+    
+    # Simple price estimation
+    base_prices = {
+        'milk': 28, 'bread': 25, 'rice': 40, 'dal': 90, 'oil': 120,
+        'onion': 30, 'potato': 25, 'tomato': 40, 'apple': 120, 'banana': 40
+    }
+    
+    item_lower = item.lower()
+    base_price = 50  # default
+    
+    for key, price in base_prices.items():
+        if key in item_lower:
+            base_price = price
+            break
+    
+    for marketplace in marketplaces:
+        multiplier = random.uniform(0.8, 1.2)
+        final_price = base_price * multiplier
+        
+        results[marketplace] = {
+            'price': round(final_price, 2),
+            'title': f"{item.title()} - {marketplace.title()}",
+            'source': 'Smart Estimate',
+            'delivery_fee': round(random.uniform(0, 50), 2),
+            'rating': round(random.uniform(3.8, 4.8), 1),
+            'availability': True
+        }
+    
+    return results
 def generate_smart_estimates(self, product_name):
         """Generate intelligent price estimates"""
         marketplaces = ['amazon', 'flipkart', 'bigbasket', 'myntra']
