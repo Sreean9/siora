@@ -54,7 +54,8 @@ def get_secret(key: str, default: str = 'demo_key') -> str:
 st.set_page_config(page_title="Siora - AI Shopping Buddy", page_icon="🛒", layout="wide")
 
 # AI Classes
-class AIShoppingIntelligence:
+class AIShoppingIntelligence: 
+     """AI for shopping recommendations using real models when available"""
 def __init__(self):
         st.success("✅ Shopping AI initialized")
 def intelligent_product_analysis(self, shopping_list):
@@ -117,6 +118,7 @@ def intelligent_product_analysis(self, shopping_list):
         return analysis
 
 class RealSerpAPIConnector:
+    """Production SERP API with advanced error handling"""
 def __init__(self):
         self.serpapi_key = get_secret('SERPAPI_KEY')
         if self.serpapi_key != 'demo_key' and SERPAPI_AVAILABLE:
@@ -235,6 +237,7 @@ def extract_price(self, price_str):
         return 100.0
 
 class RealVaaniSpeechProcessor:
+     """Production Vaani Speech Processing using real Hugging Face models"""
 def __init__(self):
         self.device = "cpu"
         self.hf_token = get_secret('HUGGINGFACE_TOKEN')
