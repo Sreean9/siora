@@ -159,8 +159,7 @@ class RealVaaniSpeechProcessor:
         
         st.info(f"🤖 Initializing AI models on {self.device}...")
         self.setup_production_models()
-
-    def setup_production_models(self):
+def setup_production_models(self):
     """Initialize production AI models with fallback strategy"""
     try:
         # Primary: OpenAI Whisper (works great with Hindi)
