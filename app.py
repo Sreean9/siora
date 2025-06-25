@@ -402,8 +402,7 @@ def __init__(self):
                 'hl': 'en'
             }
         }
-    
-    def search_real_product_prices(self, product_name):
+def search_real_product_prices(self, product_name):
         """Production search with real SERP API"""
         st.info(f"🔍 Searching real-time prices for: {product_name}")
         
@@ -424,8 +423,7 @@ def __init__(self):
                 st.error(f"❌ Error fetching from {marketplace}: {str(e)}")
         
         return results
-    
-    def fetch_production_serp_data(self, product_name, marketplace, config):
+def fetch_production_serp_data(self, product_name, marketplace, config):
         """Fetch production data with advanced error handling"""
         try:
             search_params = {
@@ -463,8 +461,7 @@ def __init__(self):
         except Exception as e:
             st.error(f"SERP API call failed for {marketplace}: {str(e)}")
             return None
-    
-    def extract_price(self, price_str):
+def extract_price(self, price_str):
         """Extract numeric price from price string"""
         try:
             import re
@@ -477,12 +474,10 @@ def __init__(self):
         return 100.0
 class AIShoppingIntelligence:
     """AI for shopping recommendations using real models when available"""
-    
-    def __init__(self):
+def __init__(self):
         self.hf_token = get_secret('HUGGINGFACE_TOKEN')
         st.success("✅ Shopping AI initialized")
-    
-    def intelligent_product_analysis(self, shopping_list):
+def intelligent_product_analysis(self, shopping_list):
         """AI analysis of shopping list"""
         analysis = {
             'categories': {},
@@ -536,13 +531,11 @@ class AIShoppingIntelligence:
         return analysis
 class RealSmartBudgetAI:
     """Real AI-powered budget analysis"""
-    
-    def __init__(self):
+def __init__(self):
         self.serpapi_key = get_secret('SERPAPI_KEY')
         self.hf_token = get_secret('HUGGINGFACE_TOKEN')
         st.success("✅ Budget AI initialized")
-    
-    def analyze_real_spending_patterns(self, transaction_history):
+def analyze_real_spending_patterns(self, transaction_history):
         """Analyze spending patterns"""
         if not transaction_history:
             return {'insights': [], 'recommendations': [], 'trends': {}, 'alerts': [], 'ai_confidence': 0}
@@ -567,8 +560,7 @@ class RealSmartBudgetAI:
             'trends': {'avg_spending': avg_spending},
             'ai_confidence': 0.8
         }
-    
-    def predict_real_monthly_budget(self, transaction_history, current_spending):
+def predict_real_monthly_budget(self, transaction_history, current_spending):
         """Predict monthly budget"""
         if not transaction_history:
             predicted = current_spending * 1.2
@@ -582,8 +574,7 @@ class RealSmartBudgetAI:
             'trend': 'stable',
             'recommendation': f'Budget ₹{predicted:.0f} for next month'
         }
-    
-    def generate_real_savings_suggestions(self, price_comparison, transaction_history):
+def generate_real_savings_suggestions(self, price_comparison, transaction_history):
         """Generate savings suggestions"""
         suggestions = [
             "💰 Compare prices across platforms before buying",
@@ -594,12 +585,10 @@ class RealSmartBudgetAI:
         return suggestions
 class AIShoppingIntelligence:
     """AI for shopping recommendations using real models when available"""
-    
-    def __init__(self):
+def __init__(self):
         self.hf_token = get_secret('HUGGINGFACE_TOKEN')  # Using secure secret function
         self.setup_ai_models()
-    
-    def setup_ai_models(self):
+def setup_ai_models(self):
         """Setup AI models for analysis"""
         try:
             if TRANSFORMERS_AVAILABLE and self.hf_token != 'demo_key':
@@ -627,8 +616,7 @@ class AIShoppingIntelligence:
             st.warning(f"⚠️ AI models setup issue: {e}. Using enhanced fallback.")
             self.sentiment_analyzer = None
             self.text_classifier = None
-    
-    def intelligent_product_analysis(self, shopping_list: List[str]) -> Dict:
+def intelligent_product_analysis(self, shopping_list: List[str]) -> Dict:
         """AI analysis of shopping list"""
         analysis = {
             'categories': {},
@@ -656,8 +644,7 @@ class AIShoppingIntelligence:
         analysis['seasonal_recommendations'] = self.get_seasonal_recommendations()
         
         return analysis
-    
-    def ai_powered_categorization(self, shopping_list: List[str], analysis: Dict) -> Dict:
+def ai_powered_categorization(self, shopping_list: List[str], analysis: Dict) -> Dict:
         """Use real AI models for product categorization"""
         try:
             category_labels = [
