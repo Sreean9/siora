@@ -1670,14 +1670,47 @@ def generate_ai_generic_suggestions(self, transaction_history: List[Dict]) -> Li
 @st.cache_resource
 def load_real_ai_components():
     """Load all real AI components with secure secret management"""
-    return {
-        'speech_processor': RealVaaniSpeechProcessor(),
-        'marketplace_connector': RealSerpAPIConnector(),
-        'shopping_ai': AIShoppingIntelligence(),
-        'budget_ai': RealSmartBudgetAI()
-    }
-
-# Load real AI components
+    try:
+        components = {}
+        
+        # Load speech processor
+        try:
+            components['speech_processor'] = RealVaaniSpeechProcessor()
+        except Exception as e:
+            st.warning(f"Speech processor error: {e}")
+            components['speech_processor'] = None
+        
+        # Load marketplace connector  
+        try:
+            components['marketplace_connector'] = RealSerpAPIConnector()
+        except Exception as e:
+            st.warning(f"Marketplace connector error: {e}")
+            components['marketplace_connector'] = None
+        
+        # Load shopping AI
+        try:
+            components['shopping_ai'] = AIShoppingIntelligence()
+        except Exception as e:
+            st.warning(f"Shopping AI error: {e}")
+            components['shopping_ai'] = None
+        
+        # Load budget AI
+        try:
+            components['budget_ai'] = RealSmartBudgetAI()
+        except Exception as e:
+            st.warning(f"Budget AI error: {e}")
+            components['budget_ai'] = None
+        
+        return components
+        
+    except Exception as e:
+        st.error(f"Failed to load AI components: {e}")
+        return {
+            'speech_processor': None,
+            'marketplace_connector': None,
+            'shopping_ai': None,
+            'budget_ai': None
+        }# Load real AI components
 ai_components = load_real_ai_components()
 
 # Enhanced Custom CSS with Real AI integration indicators
@@ -1924,13 +1957,16 @@ def main():
         </p>
     </div>
     """, unsafe_allow_html=True)
-    # Add this right after the header in main() function
+    
+    # Mode selection with proper functionality
     st.markdown("### 🎯 Choose Your Shopping Mode")
     app_mode = st.selectbox(
-    "Select Mode:",
-    ["🛒 Smart Shopping", "🎤 Voice Shopping", "📊 Budget AI", "📈 Price Analytics", "🔍 Market Intelligence"],
-    index=0
+        "Select Mode:",
+        ["🛒 Smart Shopping", "🎤 Voice Shopping", "📊 Budget AI", "📈 Price Analytics", "🔍 Market Intelligence"],
+        index=0,
+        key="app_mode_selector"
     )
+    
     # Real AI Status Indicators
     col1, col2, col3, col4 = st.columns(4)
     
@@ -1951,31 +1987,7 @@ def main():
     
     st.markdown("---")
     
-    # Sidebar for navigation and settings
-    with st.sidebar:
-        st.markdown('<div class="real-ai-indicator">🤖 Real AI Powered</div>', unsafe_allow_html=True)
-        
-        app_mode = st.selectbox(
-            "Choose Mode:",
-            ["🛒 Smart Shopping", "🎤 Voice Shopping", "📊 Budget AI", "📈 Price Analytics", "🔍 Market Intelligence"]
-        )
-        
-        st.markdown("### 🎛️ AI Settings")
-        ai_confidence_threshold = st.slider("AI Confidence Threshold", 0.5, 1.0, 0.7)
-        enable_real_time = st.checkbox("Enable Real-Time Data", value=True)
-        voice_language = st.selectbox("Voice Language", ["Hindi + English", "English Only", "Hindi Only"])
-        
-        # Quick stats
-        st.markdown("### 📊 Session Stats")
-        if 'total_searches' not in st.session_state:
-            st.session_state.total_searches = 0
-        if 'total_savings' not in st.session_state:
-            st.session_state.total_savings = 0
-        
-        st.metric("Searches Today", st.session_state.total_searches)
-        st.metric("Potential Savings", f"₹{st.session_state.total_savings:.2f}")
-    
-    # Main content area based on selected mode
+    # Route to correct interface based on selection
     if app_mode == "🛒 Smart Shopping":
         smart_shopping_interface()
     elif app_mode == "🎤 Voice Shopping":
@@ -1986,7 +1998,6 @@ def main():
         price_analytics_interface()
     elif app_mode == "🔍 Market Intelligence":
         market_intelligence_interface()
-
 def smart_shopping_interface():
     """Smart shopping interface with AI recommendations"""
     st.markdown('<div class="real-ai-indicator">🧠 AI Shopping Intelligence Active</div>', unsafe_allow_html=True)
@@ -2038,26 +2049,31 @@ def smart_shopping_interface():
     with col2:
         st.markdown("### 🤖 AI Suggestions")
         if 'shopping_list' in st.session_state and st.session_state.shopping_list:
-            # AI analysis of current list
+    # AI analysis of current list
+    if ai_components['shopping_ai'] is not None:
+        try:
             ai_analysis = ai_components['shopping_ai'].intelligent_product_analysis(st.session_state.shopping_list)
             
             # Display health score
-            health_score = ai_analysis['health_score']
+            health_score = ai_analysis.get('health_score', 50)
             score_class = "high" if health_score >= 70 else "medium" if health_score >= 40 else "low"
             st.markdown(f'<div class="confidence-indicator health-score-{score_class}">Health Score: {health_score}/100</div>', unsafe_allow_html=True)
             
             # Show AI insights
-            for insight in ai_analysis['insights'][:3]:
+            for insight in ai_analysis.get('insights', [])[:3]:
                 st.info(insight)
             
             # Complementary items
-            if ai_analysis['complementary_items']:
+            if ai_analysis.get('complementary_items'):
                 st.markdown("**AI Suggests Adding:**")
                 for item in ai_analysis['complementary_items'][:3]:
                     if st.button(f"+ {item}", key=f"add_{item}"):
                         st.session_state.shopping_list.append(item)
                         st.rerun()
-    
+        except Exception as e:
+            st.warning(f"AI analysis temporarily unavailable: {e}")
+    else:
+        st.info("🤖 AI analysis loading...")
     # Display current shopping list
     if 'shopping_list' in st.session_state and st.session_state.shopping_list:
         st.markdown("### 🛍️ Your Smart Shopping List")
