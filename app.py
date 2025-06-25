@@ -11,6 +11,9 @@ import numpy as np
 import os
 from dotenv import load_dotenv
 import warnings
+import streamlit as st
+# Add this RIGHT after the streamlit import, before anything else
+st.cache_resource.clear()
 # Add this line right after all your imports
 st.cache_resource.clear()
 
